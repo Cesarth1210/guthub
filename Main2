@@ -1,0 +1,571 @@
+--[[
+    SCRIPT PRINCIPAL COMPLETO - USANDO LIBRERÍA DESDE GITHUB
+]]
+
+local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cesarth1210/guthub/refs/heads/main/Priba"))()
+
+local player = game.Players.LocalPlayer
+local displayName = player.DisplayName or player.Name
+
+local window = library:CreateWindow("script new| Bienvenid@ " .. displayName, {
+    main_color = Color3.fromRGB(255, 0, 0),
+    min_size = Vector2.new(480, 1200),
+    can_resize = false,
+})
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Workspace = game:GetService("Workspace")
+local StarterGui = game:GetService("StarterGui")
+
+local LocalPlayer = Players.LocalPlayer
+
+local function FormatNumber(value)
+    local suffixes = {"", "K", "M", "B", "T", "Qa", "Qi"}
+    local index = 1
+    while value >= 1000 and index < #suffixes do
+        value = value / 1000
+        index = index + 1
+    end
+    return string.format("%.2f%s", value, suffixes[index])
+end
+
+local function FormatNumberWithCommas(value)
+    local formatted = tostring(value):reverse():gsub("(%d%d%d)", "%1,"):reverse()
+    return formatted:gsub("^,", "")
+end
+
+local function FormatDisplay(value)
+    local normal = FormatNumberWithCommas(value)
+    local abbreviated = FormatNumber(value)
+    return "[ " .. normal .. " | " .. abbreviated .. " ]"
+end
+
+task.spawn(function()
+    repeat task.wait() until game:IsLoaded()
+    task.wait(1)
+
+    local suffixes = {
+        {"Qi", 1e18},
+        {"Qa", 1e15},
+        {"T",  1e12},
+        {"B",  1e9},
+        {"M",  1e6},
+        {"K",  1e3},
+    }
+
+    local function formatNumber(n)
+        for _, s in ipairs(suffixes) do
+            local name, val = s[1], s[2]
+            if n >= val then
+                return string.format("%.2f%s", n / val, name)
+            end
+        end
+        return tostring(math.floor(n))
+    end
+
+    local function createBillboard(humanoid, character)
+        if not character:FindFirstChild("Head") then return end
+
+        local old = character:FindFirstChild("HP_BILLBOARD")
+        if old then old:Destroy() end
+
+        local billboard = Instance.new("BillboardGui")
+        billboard.Name = "HP_BILLBOARD"
+        billboard.Size = UDim2.new(6, 0, 1.2, 0)
+        billboard.StudsOffset = Vector3.new(0, 3.5, 0)
+        billboard.AlwaysOnTop = true
+        billboard.MaxDistance = 200
+        billboard.Parent = character.Head
+
+        local frame = Instance.new("Frame")
+        frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        frame.BackgroundTransparency = 0.3
+        frame.Size = UDim2.new(1, 0, 1, 0)
+        frame.BorderSizePixel = 0
+        frame.Parent = billboard
+
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 8)
+        corner.Parent = frame
+
+        local bar = Instance.new("Frame")
+        bar.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
+        bar.Size = UDim2.new(1, 0, 1, 0)
+        bar.BorderSizePixel = 0
+        bar.Parent = frame
+
+        local label = Instance.new("TextLabel")
+        label.BackgroundTransparency = 1
+        label.Size = UDim2.new(1, 0, 1, 0)
+        label.TextColor3 = Color3.new(1, 1, 1)
+        label.Font = Enum.Font.GothamBold
+        label.TextSize = 18
+        label.Parent = frame
+
+        local function updateHP()
+            if humanoid and humanoid.Parent then
+                local hp = humanoid.Health
+                local max = humanoid.MaxHealth
+                bar.Size = UDim2.new(hp / max, 0, 1, 0)
+                label.Text = formatNumber(hp) .. " / " .. formatNumber(max)
+            end
+        end
+
+        humanoid.HealthChanged:Connect(updateHP)
+        updateHP()
+    end
+
+    local function onCharacterAdded(character)
+        local humanoid = character:WaitForChild("Humanoid")
+        createBillboard(humanoid, character)
+    end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr.Character then
+            onCharacterAdded(plr.Character)
+        end
+        plr.CharacterAdded:Connect(onCharacterAdded)
+    end
+
+    Players.PlayerAdded:Connect(function(plr)
+        plr.CharacterAdded:Connect(onCharacterAdded)
+    end)
+end)
+
+-- ==========================================
+-- 1. PESTAÑA: PRINCIPAL
+-- ==========================================
+local MainTab = window:AddTab("Principal")
+MainTab:AddLabel("Important:")
+
+MainTab:AddSwitch("Anti Fling", function(bool)
+    if bool then
+        local playerName = game.Players.LocalPlayer.Name
+        local character = game.Workspace:FindFirstChild(playerName)
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.P = 1250
+                bodyVelocity.Parent = rootPart
+            end
+        end
+    else
+        local playerName = game.Players.LocalPlayer.Name
+        local character = game.Workspace:FindFirstChild(playerName)
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                local existingVelocity = rootPart:FindFirstChild("BodyVelocity")
+                if existingVelocity and existingVelocity.MaxForce == Vector3.new(100000, 0, 100000) then
+                    existingVelocity:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+local lockRunning = false
+local lockConnection
+local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
+    local player = game.Players.LocalPlayer
+    if Value then
+        lockRunning = true
+        lockConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            local char = player.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChildOfClass("Humanoid") then return end
+
+            local hrp = char.HumanoidRootPart
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+
+            if not humanoid:FindFirstChild("LockState") then
+                humanoid.WalkSpeed = 0
+                humanoid.JumpPower = 0
+                humanoid.AutoRotate = false
+                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
+                local marker = Instance.new("BoolValue", humanoid)
+                marker.Name = "LockState"
+                marker.Value = true
+                humanoid:SetAttribute("LockCFrame", hrp.CFrame)
+            end
+
+            local savedCFrame = humanoid:GetAttribute("LockCFrame")
+            if savedCFrame then
+                hrp.Velocity = Vector3.zero
+                hrp.RotVelocity = Vector3.zero
+                hrp.CFrame = savedCFrame
+            end
+        end)
+    else
+        lockRunning = false
+        if lockConnection then
+            lockConnection:Disconnect()
+            lockConnection = nil
+        end
+        local char = player.Character
+        if char then
+            local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = 250
+                humanoid.JumpPower = 50
+                humanoid.AutoRotate = true
+                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+                if humanoid:FindFirstChild("LockState") then
+                    humanoid.LockState:Destroy()
+                end
+                humanoid:SetAttribute("LockCFrame", nil)
+            end
+        end
+    end
+end)
+
+MainTab:AddSwitch("Show Pets", function(bool)
+    local player = game:GetService("Players").LocalPlayer
+    if player:FindFirstChild("hidePets") then
+        player.hidePets.Value = bool
+    end
+end)
+
+MainTab:AddSwitch("Show Other Pets", function(bool)
+    local player = game:GetService("Players").LocalPlayer
+    if player:FindFirstChild("showOtherPetsOn") then
+        player.showOtherPetsOn.Value = bool
+    end
+end)
+
+MainTab:AddLabel("Misc:")
+
+MainTab:AddSwitch("Infinite Jump", function(bool)
+    _G.InfiniteJump = bool
+    if bool then
+        game:GetService("UserInputService").JumpRequest:Connect(function()
+            if _G.InfiniteJump and game:GetService("Players").LocalPlayer.Character then
+                game:GetService("Players").LocalPlayer.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+            end
+        end)
+    end
+end)
+
+local parts = {}
+local partSize = 2048
+local totalDistance = 50000
+local startPosition = Vector3.new(-2, -9.5, -2)
+
+local function createAllParts()
+    local numberOfParts = math.ceil(totalDistance / partSize)
+    for x = 0, numberOfParts - 1 do
+        for z = 0, numberOfParts - 1 do
+            local function createPart(pos, name)
+                local part = Instance.new("Part")
+                part.Size = Vector3.new(partSize, 1, partSize)
+                part.Position = pos
+                part.Anchored = true
+                part.Transparency = 1
+                part.CanCollide = true
+                part.Name = name
+                part.Parent = workspace
+                return part
+            end
+            table.insert(parts, createPart(startPosition + Vector3.new(x * partSize, 0, z * partSize), "Part_Side_" .. x .. "_" .. z))
+        end
+    end
+end
+
+MainTab:AddSwitch("Anti AFK", function(state)
+    if state then
+        local vu = game:GetService('VirtualUser')
+        game.Players.LocalPlayer.Idled:Connect(function()
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end)
+    end
+end)
+
+task.spawn(createAllParts)
+
+MainTab:AddSwitch("Walk on Water", function(bool)
+    for _, part in ipairs(parts) do
+        if part and part.Parent then
+            part.CanCollide = bool
+        end
+    end
+end)
+
+local timeDropdown = MainTab:AddDropdown("Change Time", function(selection)
+    local lighting = game:GetService("Lighting")
+    if selection == "Night" then lighting.ClockTime = 0
+    elseif selection == "Day" then lighting.ClockTime = 12
+    elseif selection == "Midnight" then lighting.ClockTime = 6 end
+end)
+timeDropdown:Add("Night")
+timeDropdown:Add("Day")
+timeDropdown:Add("Midnight")
+
+-- ==========================================
+-- 2. PESTAÑA: FARM OP
+-- ==========================================
+local AutoFarm = window:AddTab("Farm Op")
+
+AutoFarm:AddSwitch("Strength Op", function(state)
+    getgenv()._AutoRepFarmEnabled = state
+end)
+
+task.spawn(function()
+    while true do
+        if getgenv()._AutoRepFarmEnabled and LocalPlayer:FindFirstChild("muscleEvent") then
+            for i = 1, 55 do
+                LocalPlayer.muscleEvent:FireServer("rep")
+            end
+        end
+        task.wait()
+    end
+end)
+
+local autoEatEnabled = false
+task.spawn(function()
+    while true do
+        if autoEatEnabled then
+            local egg = LocalPlayer:WaitForChild("Backpack"):FindFirstChild("Protein Egg")
+            if egg and LocalPlayer.Character then
+                egg.Parent = LocalPlayer.Character
+                pcall(function() egg:Activate() end)
+            end
+            task.wait(1800)
+        else
+            task.wait(1)
+        end
+    end
+end)
+
+AutoFarm:AddSwitch("Auto Eat Egg 30 Minuts", function(state)
+    autoEatEnabled = state
+end)
+
+AutoFarm:AddSwitch("Spin Fortune Wheel", function(state)
+    _G.AutoSpinWheel = state
+    if state then
+        task.spawn(function()
+            while _G.AutoSpinWheel and task.wait(0.1) do
+                game:GetService("ReplicatedStorage").rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", game:GetService("ReplicatedStorage").fortuneWheelChances["Fortune Wheel"])
+            end
+        end)
+    end
+end)
+
+AutoFarm:AddButton("Anti Lag", function()
+    for _, v in pairs(game:GetDescendants()) do
+        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then v.Enabled = false end
+    end
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 9e9
+end)
+
+AutoFarm:AddButton("Jungle Squat", function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    char:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(-8371.4336, 6.7981, 2858.8853)
+    task.wait(0.2)
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end)
+
+AutoFarm:AddButton("Jungle lift", function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    char:WaitForChild("HumanoidRootPart").CFrame = CFrame.new(-8652.8672, 29.2667, 2089.2617)
+    task.wait(0.2)
+    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+    task.wait(0.05)
+    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+end)
+
+AutoFarm:AddButton("Equip Swift Samurai", function()
+    local petsFolder = LocalPlayer:FindFirstChild("petsFolder")
+    if not petsFolder then return end
+    for _, folder in pairs(petsFolder:GetChildren()) do
+        if folder:IsA("Folder") then
+            for _, pet in pairs(folder:GetChildren()) do
+                ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", pet)
+            end
+        end
+    end
+    task.wait(0.1)
+    local equipped = 0
+    for _, folder in pairs(petsFolder:GetChildren()) do
+        if folder:IsA("Folder") then
+            for _, pet in pairs(folder:GetChildren()) do
+                if pet.Name == "Swift Samurai" then
+                    ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", pet)
+                    equipped += 1
+                    if equipped >= 8 then return end
+                end
+            end
+        end
+    end
+end)
+
+-- Folder dentro de Farm Op: Fast Rebirth
+local fastStrengthFolder = AutoFarm:AddFolder("Funciones de Renacimiento Rápido")
+local strengthStat = LocalPlayer:WaitForChild("leaderstats"):WaitForChild("Strength")
+local rebirthsStat = LocalPlayer:WaitForChild("leaderstats"):WaitForChild("Rebirths")
+
+fastStrengthFolder:AddLabel("Tiempo:")
+local uptimeLabel = fastStrengthFolder:AddLabel("0d 0h 0m 0s")
+fastStrengthFolder:AddLabel("Ritmo y Promedio de Renacimientos")
+
+local startTime = tick()
+local initialRebirths = rebirthsStat.Value
+local totalRebirthsGained = 0
+
+task.spawn(function()
+    while true do
+        local elapsed = tick() - startTime
+        local days = math.floor(elapsed / 86400)
+        local hours = math.floor((elapsed % 86400) / 3600)
+        local minutes = math.floor((elapsed % 3600) / 60)
+        local seconds = math.floor(elapsed % 60)
+        uptimeLabel.Text = string.format("%dd %dh %dm %ds", days, hours, minutes, seconds)
+        task.wait(1)
+    end
+end)
+
+getgenv().AutoFarming = false
+fastStrengthFolder:AddSwitch("Fast Rebirth", function(state)
+    getgenv().AutoFarming = state
+    if state then
+        task.spawn(function()
+            while getgenv().AutoFarming do
+                for _ = 1, 27 do
+                    LocalPlayer.muscleEvent:FireServer("rep")
+                end
+                task.wait()
+            end
+        end)
+    end
+end)
+
+-- Folder dentro de Farm Op: Rebiths Without Packs
+local rebirthFolder = AutoFarm:AddFolder("Rebiths Without Packs")
+rebirthFolder:AddSwitch("Auto Rebirth (Infinitely)", function(bool)
+    _G.infiniteRebirthActive = bool
+    if bool then
+        task.spawn(function()
+            while _G.infiniteRebirthActive and task.wait(0.1) do
+                ReplicatedStorage.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+            end
+        end)
+    end
+end)
+
+rebirthFolder:AddSwitch("Auto Size 2", function(bool)
+    _G.autoSizeActive = bool
+    if bool then
+        task.spawn(function()
+            while _G.autoSizeActive and task.wait() do
+                ReplicatedStorage.rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 2)
+            end
+        end)
+    end
+end)
+
+-- ==========================================
+-- 3. PESTAÑA: ESTADÍSTICAS
+-- ==========================================
+local estadisticas = window:AddTab("Estadisticas")
+local SelectPlayerName = ""
+
+local PlayerDrop = estadisticas:AddDropdown("Select Player", function(Value)
+    SelectPlayerName = Value:match("| (.+)")
+end)
+
+for _, Plr in pairs(Players:GetPlayers()) do
+    if Plr ~= player then PlayerDrop:Add(Plr.DisplayName .. " | " .. Plr.Name) end
+end
+
+local Update = estadisticas:AddLabel("Strength: N/A")
+local Update1 = estadisticas:AddLabel("Gems: N/A")
+local Update2 = estadisticas:AddLabel("Rebirth: N/A")
+
+task.spawn(function()
+    while task.wait(0.5) do
+        local selPlr = SelectPlayerName ~= "" and Players:FindFirstChild(SelectPlayerName)
+        if selPlr and selPlr:FindFirstChild("leaderstats") then
+            Update.Text = "Strength: " .. tostring(selPlr.leaderstats.Strength.Value)
+            Update2.Text = "Rebirth: " .. tostring(selPlr.leaderstats.Rebirths.Value)
+        end
+    end
+end)
+
+-- ==========================================
+-- 4. PESTAÑA: CRISTALES
+-- ==========================================
+local pets = window:AddTab("Cristales")
+pets:AddLabel("=== Buy pets and auras ===")
+
+local selectedPet = ""
+local petDropdown = pets:AddDropdown("Select pet", function(text)
+    selectedPet = text
+end)
+petDropdown:Add("Blue Birdie (Basic)")
+petDropdown:Add("Dark Vampy (Advanced)")
+petDropdown:Add("Crimson Falcon (Rare)")
+
+pets:AddSwitch("Auto Buy Pet", function(bool)
+    _G.AutoBuyPet = bool
+    if bool then
+        task.spawn(function()
+            while _G.AutoBuyPet and selectedPet ~= "" do
+                local petName = selectedPet:match("^(.-)%s*%(") or selectedPet
+                local petToBuy = ReplicatedStorage.cPetShopFolder:FindFirstChild(petName)
+                if petToBuy then
+                    ReplicatedStorage.cPetShopRemote:InvokeServer(petToBuy)
+                end
+                task.wait(0.1)
+            end
+        end)
+    end
+end)
+
+-- ==========================================
+-- 5. PESTAÑA: REGALOS
+-- ==========================================
+local Gift = window:AddTab("Regalos")
+Gift:AddLabel("Egg Gifter:")
+local proteinEggLabel = Gift:AddLabel("Protein Eggs: 0")
+
+local selectedProteinPlayer = nil
+local proteinEggCount = 0
+
+local proteinDropdown = Gift:AddDropdown("Choose Player (Egg)", function(name)
+    selectedProteinPlayer = Players:FindFirstChild(name)
+end)
+for _, p in ipairs(Players:GetPlayers()) do
+    if p ~= player then proteinDropdown:Add(p.Name) end
+end
+
+Gift:AddTextBox("Egg Amount", function(Text)
+    proteinEggCount = tonumber(Text) or 0
+end)
+
+Gift:AddButton("Start Egg Gifting", function()
+    if selectedProteinPlayer and proteinEggCount > 0 then
+        task.spawn(function()
+            local folder = player:FindFirstChild("consumablesFolder")
+            if not folder then return end
+            for i = 1, proteinEggCount do
+                local eggItem = folder:FindFirstChild("Protein Egg")
+                if eggItem then
+                    ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedProteinPlayer, eggItem)
+                    task.wait(0.1)
+                else break end
+            end
+        end)
+    end
+end)
+
+print("¡Script completo cargado exitosamente usando la librería de GitHub!")
