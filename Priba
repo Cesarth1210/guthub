@@ -1,10 +1,11 @@
 --[[
-    LIBRERÍA MODERNA "DEEP UI" - EJECUTABLE DIRECTO
+    LIBRERÍA MODERNA "DEEP UI" - 100% CORREGIDA Y FUNCIONAL
 ]]
 
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 
 local Theme = {
     Background = Color3.fromRGB(15, 15, 18),
@@ -20,6 +21,7 @@ local Theme = {
 }
 
 local Library = {}
+Library.__index = Library
 
 local function CreateCorner(parent, radius)
     local corner = Instance.new("UICorner")
@@ -95,17 +97,35 @@ function Library:CreateWindow(title, subtitle)
     ToggleBtn.Parent = ScreenGui
     CreateCorner(ToggleBtn, 25)
     CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
+    
+    local BtnShadow = Instance.new("Frame")
+    BtnShadow.Size = UDim2.new(1, 6, 1, 6)
+    BtnShadow.Position = UDim2.new(0, -3, 0, -3)
+    BtnShadow.BackgroundColor3 = Theme.Shadow
+    BtnShadow.BackgroundTransparency = 0.6
+    BtnShadow.ZIndex = -1
+    BtnShadow.Parent = ToggleBtn
+    CreateCorner(BtnShadow, 25)
 
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 600, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+    MainFrame.Size = UDim2.new(0, 550, 0, 360)
+    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -180)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
-    MainFrame.Visible = true -- Visible por defecto al ejecutar
+    MainFrame.Visible = true -- Visible por defecto para verificar carga
     MainFrame.Parent = ScreenGui
     CreateCorner(MainFrame, 12)
     CreateStroke(MainFrame, Theme.Border, 1.5, 0.3)
+
+    local MainShadow = Instance.new("Frame")
+    MainShadow.Size = UDim2.new(1, 20, 1, 20)
+    MainShadow.Position = UDim2.new(0, -10, 0, -10)
+    MainShadow.BackgroundColor3 = Theme.Shadow
+    MainShadow.BackgroundTransparency = 0.5
+    MainShadow.ZIndex = -1
+    MainShadow.Parent = MainFrame
+    CreateCorner(MainShadow, 12)
     
     MakeDraggable(MainFrame)
 
@@ -117,7 +137,7 @@ function Library:CreateWindow(title, subtitle)
 
     local Sidebar = Instance.new("Frame")
     Sidebar.Name = "Sidebar"
-    Sidebar.Size = UDim2.new(0, 160, 1, 0)
+    Sidebar.Size = UDim2.new(0, 150, 1, 0)
     Sidebar.BackgroundColor3 = Theme.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
@@ -131,48 +151,52 @@ function Library:CreateWindow(title, subtitle)
     SidebarCornerFix.Parent = Sidebar
 
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -20, 0, 30)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 15)
+    TitleLabel.Size = UDim2.new(1, -15, 0, 25)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 12)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title or "Muscle Legends"
     TitleLabel.TextColor3 = Theme.Text
-    TitleLabel.TextSize = 16
+    TitleLabel.TextSize = 15
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.Parent = Sidebar
 
     local SubtitleLabel = Instance.new("TextLabel")
-    SubtitleLabel.Size = UDim2.new(1, -20, 0, 20)
-    SubtitleLabel.Position = UDim2.new(0, 10, 0, 40)
+    SubtitleLabel.Size = UDim2.new(1, -15, 0, 18)
+    SubtitleLabel.Position = UDim2.new(0, 10, 0, 35)
     SubtitleLabel.BackgroundTransparency = 1
     SubtitleLabel.Text = subtitle or "By FourHub"
     SubtitleLabel.TextColor3 = Theme.SubText
-    SubtitleLabel.TextSize = 12
+    SubtitleLabel.TextSize = 11
     SubtitleLabel.Font = Enum.Font.Gotham
     SubtitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     SubtitleLabel.Parent = Sidebar
 
     local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Size = UDim2.new(1, -20, 1, -80)
-    TabContainer.Position = UDim2.new(0, 10, 0, 70)
+    TabContainer.Size = UDim2.new(1, -10, 1, -65)
+    TabContainer.Position = UDim2.new(0, 5, 0, 60)
     TabContainer.BackgroundTransparency = 1
     TabContainer.ScrollBarThickness = 2
     TabContainer.Parent = Sidebar
 
     local TabListLayout = Instance.new("UIListLayout")
     TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    TabListLayout.Padding = UDim.new(0, 6)
+    TabListLayout.Padding = UDim.new(0, 5)
     TabListLayout.Parent = TabContainer
 
+    TabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 10)
+    end)
+
     local ContentContainer = Instance.new("Frame")
-    ContentContainer.Size = UDim2.new(1, -170, 1, -20)
-    ContentContainer.Position = UDim2.new(0, 165, 0, 10)
+    ContentContainer.Size = UDim2.new(1, -165, 1, -20)
+    ContentContainer.Position = UDim2.new(0, 160, 0, 10)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.Parent = MainFrame
 
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 22, 0, 22)
-    CloseBtn.Position = UDim2.new(1, -32, 0, 10)
+    CloseBtn.Position = UDim2.new(1, -30, 0, 10)
     CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
     CloseBtn.Text = "X"
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -184,12 +208,12 @@ function Library:CreateWindow(title, subtitle)
     
     CloseBtn.MouseButton1Click:Connect(ToggleUI)
 
-    local WindowObj = {}
+    local Tabs = {}
     local CurrentTab = nil
 
-    function WindowObj:CreateTab(tabName)
+    function Tabs:CreateTab(tabName)
         local TabButton = Instance.new("TextButton")
-        TabButton.Size = UDim2.new(1, 0, 0, 32)
+        TabButton.Size = UDim2.new(1, -5, 0, 32)
         TabButton.BackgroundColor3 = Theme.ElementBg
         TabButton.Text = "   " .. tabName
         TabButton.TextColor3 = Theme.SubText
@@ -200,8 +224,6 @@ function Library:CreateWindow(title, subtitle)
         CreateCorner(TabButton, 6)
         CreateStroke(TabButton, Theme.Border, 1, 0.5)
         
-        TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 10)
-
         local TabContentFrame = Instance.new("ScrollingFrame")
         TabContentFrame.Size = UDim2.new(1, 0, 1, 0)
         TabContentFrame.BackgroundTransparency = 1
@@ -321,14 +343,104 @@ function Library:CreateWindow(title, subtitle)
             }
         end
 
+        function TabData:AddSlider(text, min, max, default, callback)
+            local SliderFrame = Instance.new("Frame")
+            SliderFrame.Size = UDim2.new(1, -5, 0, 50)
+            SliderFrame.BackgroundColor3 = Theme.ElementBg
+            SliderFrame.Parent = TabContentFrame
+            CreateCorner(SliderFrame, 6)
+            CreateStroke(SliderFrame, Theme.Border, 1, 0.5)
+
+            local Title = Instance.new("TextLabel")
+            Title.Size = UDim2.new(1, -20, 0, 20)
+            Title.Position = UDim2.new(0, 10, 0, 5)
+            Title.BackgroundTransparency = 1
+            Title.Text = text
+            Title.TextColor3 = Theme.Text
+            Title.TextSize = 13
+            Title.Font = Enum.Font.GothamMedium
+            Title.TextXAlignment = Enum.TextXAlignment.Left
+            Title.Parent = SliderFrame
+
+            local ValueLabel = Instance.new("TextLabel")
+            ValueLabel.Size = UDim2.new(0, 50, 0, 20)
+            ValueLabel.Position = UDim2.new(1, -60, 0, 5)
+            ValueLabel.BackgroundTransparency = 1
+            ValueLabel.Text = tostring(default)
+            ValueLabel.TextColor3 = Theme.Accent
+            ValueLabel.TextSize = 13
+            ValueLabel.Font = Enum.Font.GothamBold
+            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
+            ValueLabel.Parent = SliderFrame
+
+            local BarBg = Instance.new("Frame")
+            BarBg.Size = UDim2.new(1, -20, 0, 6)
+            BarBg.Position = UDim2.new(0, 10, 0, 32)
+            BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
+            BarBg.Parent = SliderFrame
+            CreateCorner(BarBg, 3)
+
+            local BarFill = Instance.new("Frame")
+            BarFill.Size = UDim2.new(0, 0, 1, 0)
+            BarFill.BackgroundColor3 = Theme.Accent
+            BarFill.Parent = BarBg
+            CreateCorner(BarFill, 3)
+
+            local dragging = false
+
+            local function UpdateSlider(input)
+                local barPos = BarBg.AbsolutePosition.X
+                local barSize = BarBg.AbsoluteSize.X
+                local percentage = math.clamp((input.Position.X - barPos) / barSize, 0, 1)
+                
+                local val = math.floor(min + (max - min) * percentage)
+                ValueLabel.Text = tostring(val)
+                BarFill.Size = UDim2.new(percentage, 0, 1, 0)
+                
+                if callback then pcall(callback, val) end
+            end
+
+            BarBg.InputBegan:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = true
+                    UpdateSlider(input)
+                end
+            end)
+
+            UserInputService.InputChanged:Connect(function(input)
+                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+                    UpdateSlider(input)
+                end
+            end)
+
+            UserInputService.InputEnded:Connect(function(input)
+                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+                    dragging = false
+                end
+            end)
+            
+            local initPercent = (default - min) / (max - min)
+            BarFill.Size = UDim2.new(initPercent, 0, 1, 0)
+            
+            return {
+                Set = function(val)
+                    local clampedVal = math.clamp(val, min, max)
+                    local percent = (clampedVal - min) / (max - min)
+                    ValueLabel.Text = tostring(clampedVal)
+                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
+                    if callback then pcall(callback, clampedVal) end
+                end
+            }
+        end
+
         return TabData
     end
 
-    return WindowObj
+    return Tabs
 end
 
 -- ==========================================
--- CREACIÓN DE LA VENTANA Y PESTAÑAS (EJEMPLO)
+-- EJEMPLO DE USO (LISTO PARA PROBAR)
 -- ==========================================
 local Window = Library:CreateWindow("Muscle Legends", "By FourHub")
 
@@ -340,4 +452,20 @@ HomeTab:AddToggle("Auto Rebirth", false, function(state)
     print("Auto Rebirth:", state) 
 end)
 
-print("¡Interfaz cargada con éxito!")
+local FarmTab = Window:CreateTab("Farm")
+FarmTab:AddToggle("Auto Swing", true, function(state) 
+    print("Auto Swing:", state) 
+end)
+FarmTab:AddSlider("Walk Speed", 16, 200, 16, function(value)
+    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end
+end)
+
+local RebirthTab = Window:CreateTab("Rebirth")
+RebirthTab:AddButton("Rebirth Automático", function() end)
+
+local MiscTab = Window:CreateTab("Misc")
+MiscTab:AddToggle("Anti AFK", true, function(state) end)
+
+print("¡DeepUI cargada y visible!")
