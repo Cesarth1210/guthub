@@ -1,11 +1,10 @@
 --[[
-    LIBRERÍA MODERNA "DEEP UI" - CORREGIDA Y FUNCIONAL
+    LIBRERÍA MODERNA "DEEP UI" - EJECUTABLE DIRECTO
 ]]
 
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local Players = game:GetService("Players")
 
 local Theme = {
     Background = Color3.fromRGB(15, 15, 18),
@@ -96,15 +95,6 @@ function Library:CreateWindow(title, subtitle)
     ToggleBtn.Parent = ScreenGui
     CreateCorner(ToggleBtn, 25)
     CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
-    
-    local BtnShadow = Instance.new("Frame")
-    BtnShadow.Size = UDim2.new(1, 6, 1, 6)
-    BtnShadow.Position = UDim2.new(0, -3, 0, -3)
-    BtnShadow.BackgroundColor3 = Theme.Shadow
-    BtnShadow.BackgroundTransparency = 0.6
-    BtnShadow.ZIndex = -1
-    BtnShadow.Parent = ToggleBtn
-    CreateCorner(BtnShadow, 25)
 
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
@@ -112,35 +102,15 @@ function Library:CreateWindow(title, subtitle)
     MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
-    MainFrame.Visible = false
+    MainFrame.Visible = true -- Visible por defecto al ejecutar
     MainFrame.Parent = ScreenGui
     CreateCorner(MainFrame, 12)
     CreateStroke(MainFrame, Theme.Border, 1.5, 0.3)
     
-    local MainShadow = Instance.new("Frame")
-    MainShadow.Size = UDim2.new(1, 20, 1, 20)
-    MainShadow.Position = UDim2.new(0, -10, 0, -10)
-    MainShadow.BackgroundColor3 = Theme.Shadow
-    MainShadow.BackgroundTransparency = 0.5
-    MainShadow.ZIndex = -1
-    MainShadow.Parent = MainFrame
-    CreateCorner(MainShadow, 12)
-    
     MakeDraggable(MainFrame)
 
     local function ToggleUI()
-        if MainFrame.Visible then
-            TweenService:Create(MainFrame, TweenInfo.new(0.25, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
-            task.wait(0.25)
-            MainFrame.Visible = false
-            MainFrame.Size = UDim2.new(0, 600, 0, 400)
-            MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-        else
-            MainFrame.Visible = true
-            MainFrame.Size = UDim2.new(0, 0, 0, 0)
-            MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-            TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 400), Position = UDim2.new(0.5, -300, 0.5, -200)}):Play()
-        end
+        MainFrame.Visible = not MainFrame.Visible
     end
 
     ToggleBtn.MouseButton1Click:Connect(ToggleUI)
@@ -351,100 +321,23 @@ function Library:CreateWindow(title, subtitle)
             }
         end
 
-        function TabData:AddSlider(text, min, max, default, callback)
-            local SliderFrame = Instance.new("Frame")
-            SliderFrame.Size = UDim2.new(1, -5, 0, 50)
-            SliderFrame.BackgroundColor3 = Theme.ElementBg
-            SliderFrame.Parent = TabContentFrame
-            CreateCorner(SliderFrame, 6)
-            CreateStroke(SliderFrame, Theme.Border, 1, 0.5)
-
-            local Title = Instance.new("TextLabel")
-            Title.Size = UDim2.new(1, -20, 0, 20)
-            Title.Position = UDim2.new(0, 10, 0, 5)
-            Title.BackgroundTransparency = 1
-            Title.Text = text
-            Title.TextColor3 = Theme.Text
-            Title.TextSize = 13
-            Title.Font = Enum.Font.GothamMedium
-            Title.TextXAlignment = Enum.TextXAlignment.Left
-            Title.Parent = SliderFrame
-
-            local ValueLabel = Instance.new("TextLabel")
-            ValueLabel.Size = UDim2.new(0, 50, 0, 20)
-            ValueLabel.Position = UDim2.new(1, -60, 0, 5)
-            ValueLabel.BackgroundTransparency = 1
-            ValueLabel.Text = tostring(default)
-            ValueLabel.TextColor3 = Theme.Accent
-            ValueLabel.TextSize = 13
-            ValueLabel.Font = Enum.Font.GothamBold
-            ValueLabel.TextXAlignment = Enum.TextXAlignment.Right
-            ValueLabel.Parent = SliderFrame
-
-            local BarBg = Instance.new("Frame")
-            BarBg.Size = UDim2.new(1, -20, 0, 6)
-            BarBg.Position = UDim2.new(0, 10, 0, 32)
-            BarBg.BackgroundColor3 = Color3.fromRGB(40, 40, 50)
-            BarBg.Parent = SliderFrame
-            CreateCorner(BarBg, 3)
-
-            local BarFill = Instance.new("Frame")
-            BarFill.Size = UDim2.new(0, 0, 1, 0)
-            BarFill.BackgroundColor3 = Theme.Accent
-            BarFill.Parent = BarBg
-            CreateCorner(BarFill, 3)
-
-            local dragging = false
-
-            local function UpdateSlider(input)
-                local barPos = BarBg.AbsolutePosition.X
-                local barSize = BarBg.AbsoluteSize.X
-                local percentage = math.clamp((input.Position.X - barPos) / barSize, 0, 1)
-                
-                local val = math.floor(min + (max - min) * percentage)
-                ValueLabel.Text = tostring(val)
-                BarFill.Size = UDim2.new(percentage, 0, 1, 0)
-                
-                if callback then pcall(callback, val) end
-            end
-
-            BarBg.InputBegan:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    dragging = true
-                    UpdateSlider(input)
-                end
-            end)
-
-            UserInputService.InputChanged:Connect(function(input)
-                if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-                    UpdateSlider(input)
-                end
-            end)
-
-            UserInputService.InputEnded:Connect(function(input)
-                if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    dragging = false
-                end
-            end)
-            
-            local initPercent = (default - min) / (max - min)
-            BarFill.Size = UDim2.new(initPercent, 0, 1, 0)
-            
-            return {
-                Set = function(val)
-                    local clampedVal = math.clamp(val, min, max)
-                    local percent = (clampedVal - min) / (max - min)
-                    ValueLabel.Text = tostring(clampedVal)
-                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
-                    if callback then pcall(callback, clampedVal) end
-                end
-            }
-        end
-
         return TabData
     end
 
     return WindowObj
 end
 
-return Library
+-- ==========================================
+-- CREACIÓN DE LA VENTANA Y PESTAÑAS (EJEMPLO)
+-- ==========================================
+local Window = Library:CreateWindow("Muscle Legends", "By FourHub")
+
+local HomeTab = Window:CreateTab("Home")
+HomeTab:AddButton("Iniciar Farm", function() 
+    print("Farm iniciado...") 
+end)
+HomeTab:AddToggle("Auto Rebirth", false, function(state) 
+    print("Auto Rebirth:", state) 
+end)
+
+print("¡Interfaz cargada con éxito!")
