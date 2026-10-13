@@ -1,25 +1,22 @@
---[[
-    LIBRERÍA MODERNA - ESTILO SIDEBAR
-    Basada en la imagen proporcionada.
-    Hecha para ser ejecutada en Roblox.
-]]
-
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
 
--- Configuración de colores (Estilo oscuro moderno)
+-- ==========================================
+-- CONFIGURACIÓN DE COLORES (TEMA PROFUNDO)
+-- ==========================================
 local Theme = {
     Background = Color3.fromRGB(18, 18, 22),
     Sidebar = Color3.fromRGB(22, 22, 28),
-    Accent = Color3.fromRGB(100, 120, 255), -- Azul moderno
+    Accent = Color3.fromRGB(160, 50, 255), -- Morado brillante
+    AccentHover = Color3.fromRGB(180, 80, 255),
     Text = Color3.fromRGB(240, 240, 240),
     SubText = Color3.fromRGB(160, 160, 170),
     ElementBg = Color3.fromRGB(30, 30, 38),
-    ElementHover = Color3.fromRGB(40, 40, 50),
-    Border = Color3.fromRGB(45, 45, 55)
+    ElementHover = Color3.fromRGB(45, 45, 55),
+    Border = Color3.fromRGB(60, 60, 70),
+    Shadow = Color3.fromRGB(0, 0, 0)
 }
 
 local Library = {}
@@ -28,16 +25,17 @@ Library.__index = Library
 -- Función para crear esquinas redondeadas
 local function CreateCorner(parent, radius)
     local corner = Instance.new("UICorner")
-    corner.CornerRadius = UDim.new(0, radius or 6)
+    corner.CornerRadius = UDim.new(0, radius or 8)
     corner.Parent = parent
     return corner
 end
 
--- Función para crear un borde de gradiente (opcional para estilo)
-local function CreateStroke(parent, color, thickness)
+-- Función para crear un borde de gradiente (estilo profundo)
+local function CreateStroke(parent, color, thickness, transparency)
     local stroke = Instance.new("UIStroke")
     stroke.Color = color or Theme.Border
-    stroke.Thickness = thickness or 1
+    stroke.Thickness = thickness or 1.5
+    stroke.Transparency = transparency or 0
     stroke.Parent = parent
     return stroke
 end
@@ -77,22 +75,88 @@ end
 -- Inicializar la ventana principal
 function Library:CreateWindow(title, subtitle)
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "ModernUI"
+    ScreenGui.Name = "ModernUI_Pro"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.Parent = CoreGui
 
-    -- Ventana principal
+    -- ==========================================
+    -- BOTÓN FLOTANTE (MORADO/FUCSIA)
+    -- ==========================================
+    local ToggleBtn = Instance.new("TextButton")
+    ToggleBtn.Name = "ToggleBtn"
+    ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+    ToggleBtn.Position = UDim2.new(0, 20, 0.5, -25)
+    ToggleBtn.BackgroundColor3 = Theme.Accent
+    ToggleBtn.Text = "M"
+    ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleBtn.TextSize = 24
+    ToggleBtn.Font = Enum.Font.GothamBold
+    ToggleBtn.Parent = ScreenGui
+    CreateCorner(ToggleBtn, 25)
+    CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
+    
+    -- Sombra del botón flotante
+    local BtnShadow = Instance.new("ImageLabel")
+    BtnShadow.Size = UDim2.new(1, 10, 1, 10)
+    BtnShadow.Position = UDim2.new(0, -5, 0, -5)
+    BtnShadow.BackgroundTransparency = 1
+    BtnShadow.Image = "rbxassetid://5554236805" -- Sombra suave
+    BtnShadow.ImageColor3 = Theme.Shadow
+    BtnShadow.ImageTransparency = 0.6
+    BtnShadow.ZIndex = -1
+    BtnShadow.Parent = ToggleBtn
+
+    -- ==========================================
+    -- VENTANA PRINCIPAL
+    -- ==========================================
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 600, 0, 400)
     MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
+    MainFrame.Visible = false
     MainFrame.Parent = ScreenGui
-    CreateCorner(MainFrame, 10)
-    CreateStroke(MainFrame, Theme.Border, 1.5)
+    CreateCorner(MainFrame, 12)
+    
+    -- Borde de gradiente profundo
+    local MainStroke = Instance.new("UIStroke")
+    MainStroke.Color = Theme.Accent
+    MainStroke.Thickness = 2
+    MainStroke.Transparency = 0.7
+    MainStroke.Parent = MainFrame
+
+    -- Sombra de la ventana principal
+    local MainShadow = Instance.new("ImageLabel")
+    MainShadow.Size = UDim2.new(1, 40, 1, 40)
+    MainShadow.Position = UDim2.new(0, -20, 0, -20)
+    MainShadow.BackgroundTransparency = 1
+    MainShadow.Image = "rbxassetid://5554236805"
+    MainShadow.ImageColor3 = Theme.Shadow
+    MainShadow.ImageTransparency = 0.4
+    MainShadow.ZIndex = -1
+    MainShadow.Parent = MainFrame
+    
     MakeDraggable(MainFrame)
+
+    -- Animación de apertura/cierre
+    local function ToggleUI()
+        if MainFrame.Visible then
+            TweenService:Create(MainFrame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0), Position = UDim2.new(0.5, 0, 0.5, 0)}):Play()
+            task.wait(0.3)
+            MainFrame.Visible = false
+            MainFrame.Size = UDim2.new(0, 600, 0, 400)
+            MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+        else
+            MainFrame.Visible = true
+            MainFrame.Size = UDim2.new(0, 0, 0, 0)
+            MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+            TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 600, 0, 400), Position = UDim2.new(0.5, -300, 0.5, -200)}):Play()
+        end
+    end
+
+    ToggleBtn.MouseButton1Click:Connect(ToggleUI)
 
     -- Panel Lateral (Sidebar)
     local Sidebar = Instance.new("Frame")
@@ -101,19 +165,18 @@ function Library:CreateWindow(title, subtitle)
     Sidebar.BackgroundColor3 = Theme.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
-    CreateCorner(Sidebar, 10)
+    CreateCorner(Sidebar, 12)
     
-    -- Ajuste para que el sidebar no tenga esquinas redondeadas en la derecha
     local SidebarCornerFix = Instance.new("Frame")
-    SidebarCornerFix.Size = UDim2.new(0, 10, 1, 0)
-    SidebarCornerFix.Position = UDim2.new(1, -10, 0, 0)
+    SidebarCornerFix.Size = UDim2.new(0, 12, 1, 0)
+    SidebarCornerFix.Position = UDim2.new(1, -12, 0, 0)
     SidebarCornerFix.BackgroundColor3 = Theme.Sidebar
     SidebarCornerFix.BorderSizePixel = 0
     SidebarCornerFix.Parent = Sidebar
 
     -- Título en el Sidebar
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -20, 0, 40)
+    TitleLabel.Size = UDim2.new(1, -20, 0, 30)
     TitleLabel.Position = UDim2.new(0, 10, 0, 15)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title or "Muscle Legends"
@@ -143,10 +206,10 @@ function Library:CreateWindow(title, subtitle)
 
     local TabListLayout = Instance.new("UIListLayout")
     TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    TabListLayout.Padding = UDim.new(0, 5)
+    TabListLayout.Padding = UDim.new(0, 6)
     TabListLayout.Parent = TabContainer
 
-    -- Contenedor de contenido (donde irán los botones)
+    -- Contenedor de contenido
     local ContentContainer = Instance.new("Frame")
     ContentContainer.Size = UDim2.new(1, -160, 1, -20)
     ContentContainer.Position = UDim2.new(0, 160, 0, 10)
@@ -158,25 +221,30 @@ function Library:CreateWindow(title, subtitle)
     ContentLayout.Padding = UDim.new(0, 8)
     ContentLayout.Parent = ContentContainer
 
-    -- Botón de cerrar
+    -- Botón de Cerrar (Pequeño y Rojo)
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-    CloseBtn.Position = UDim2.new(1, -34, 0, 10)
-    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 80, 80)
+    CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+    CloseBtn.Position = UDim2.new(1, -32, 0, 10)
+    CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
     CloseBtn.Text = "X"
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     CloseBtn.TextSize = 12
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = MainFrame
-    CreateCorner(CloseBtn, 6)
-    CloseBtn.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
+    CreateCorner(CloseBtn, 11)
+    CreateStroke(CloseBtn, Color3.fromRGB(255, 255, 255), 1, 0.5)
+    
+    CloseBtn.MouseEnter:Connect(function()
+        TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 100, 100)}):Play()
     end)
+    CloseBtn.MouseLeave:Connect(function()
+        TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 70, 70)}):Play()
+    end)
+    CloseBtn.MouseButton1Click:Connect(ToggleUI)
 
     local Tabs = {}
     local CurrentTab = nil
 
-    -- Función para crear nuevas pestañas
     function Tabs:CreateTab(tabName)
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, 0, 0, 32)
@@ -188,6 +256,7 @@ function Library:CreateWindow(title, subtitle)
         TabButton.TextXAlignment = Enum.TextXAlignment.Left
         TabButton.Parent = TabContainer
         CreateCorner(TabButton, 6)
+        CreateStroke(TabButton, Theme.Border, 1, 0.5)
         
         local TabContentFrame = Instance.new("Frame")
         TabContentFrame.Size = UDim2.new(1, 0, 1, 0)
@@ -202,25 +271,22 @@ function Library:CreateWindow(title, subtitle)
 
         local TabData = {}
 
-        -- Función para seleccionar la pestaña
         local function SelectTab()
             if CurrentTab then
-                CurrentTab.Button.BackgroundColor3 = Theme.ElementBg
-                CurrentTab.Button.TextColor3 = Theme.SubText
+                -- Animación de salida
+                TweenService:Create(CurrentTab.Button, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementBg, TextColor3 = Theme.SubText}):Play()
                 CurrentTab.Content.Visible = false
             end
             CurrentTab = {Button = TabButton, Content = TabContentFrame}
-            TabButton.BackgroundColor3 = Theme.Accent
-            TabButton.TextColor3 = Theme.Text
+            -- Animación de entrada
+            TweenService:Create(TabButton, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.Text}):Play()
             TabContentFrame.Visible = true
         end
 
         TabButton.MouseButton1Click:Connect(SelectTab)
-        
-        -- Auto-seleccionar la primera pestaña
         if not CurrentTab then SelectTab() end
 
-        -- Añadir un Botón
+        -- Añadir un Botón Animado
         function TabData:AddButton(text, callback)
             local Btn = Instance.new("TextButton")
             Btn.Size = UDim2.new(1, 0, 0, 36)
@@ -231,24 +297,32 @@ function Library:CreateWindow(title, subtitle)
             Btn.Font = Enum.Font.GothamMedium
             Btn.Parent = TabContentFrame
             CreateCorner(Btn, 6)
-            CreateStroke(Btn, Theme.Border, 1)
+            CreateStroke(Btn, Theme.Border, 1, 0.5)
             
-            Btn.MouseEnter:Connect(function() Btn.BackgroundColor3 = Theme.ElementHover end)
-            Btn.MouseLeave:Connect(function() Btn.BackgroundColor3 = Theme.ElementBg end)
+            Btn.MouseEnter:Connect(function()
+                TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementHover}):Play()
+            end)
+            Btn.MouseLeave:Connect(function()
+                TweenService:Create(Btn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementBg}):Play()
+            end)
             Btn.MouseButton1Click:Connect(function()
+                -- Efecto de clic
+                TweenService:Create(Btn, TweenInfo.new(0.1), {Size = UDim2.new(0.95, 0, 0.95, 0)}):Play()
+                task.wait(0.1)
+                TweenService:Create(Btn, TweenInfo.new(0.1), {Size = UDim2.new(1, 0, 1, 0)}):Play()
                 if callback then pcall(callback) end
             end)
             return Btn
         end
 
-        -- Añadir un Toggle (Switch)
+        -- Añadir un Toggle (Switch) Animado
         function TabData:AddToggle(text, default, callback)
             local ToggleFrame = Instance.new("Frame")
             ToggleFrame.Size = UDim2.new(1, 0, 0, 36)
             ToggleFrame.BackgroundColor3 = Theme.ElementBg
             ToggleFrame.Parent = TabContentFrame
             CreateCorner(ToggleFrame, 6)
-            CreateStroke(ToggleFrame, Theme.Border, 1)
+            CreateStroke(ToggleFrame, Theme.Border, 1, 0.5)
 
             local Label = Instance.new("TextLabel")
             Label.Size = UDim2.new(1, -60, 1, 0)
@@ -279,11 +353,11 @@ function Library:CreateWindow(title, subtitle)
             
             local function UpdateState()
                 if Toggled then
-                    TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent}):Play()
-                    TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(1, -18, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
+                    TweenService:Create(SwitchBg, TweenInfo.new(0.3, Enum.EasingStyle.Back), {BackgroundColor3 = Theme.Accent}):Play()
+                    TweenService:Create(SwitchCircle, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Position = UDim2.new(1, -18, 0.5, -8), BackgroundColor3 = Color3.fromRGB(255,255,255)}):Play()
                 else
-                    TweenService:Create(SwitchBg, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
-                    TweenService:Create(SwitchCircle, TweenInfo.new(0.2), {Position = UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = Color3.fromRGB(200,200,200)}):Play()
+                    TweenService:Create(SwitchBg, TweenInfo.new(0.3, Enum.EasingStyle.Back), {BackgroundColor3 = Color3.fromRGB(50, 50, 60)}):Play()
+                    TweenService:Create(SwitchCircle, TweenInfo.new(0.3, Enum.EasingStyle.Back), {Position = UDim2.new(0, 2, 0.5, -8), BackgroundColor3 = Color3.fromRGB(200,200,200)}):Play()
                 end
             end
             
@@ -310,14 +384,14 @@ function Library:CreateWindow(title, subtitle)
             }
         end
 
-        -- Añadir un Slider
+        -- Añadir un Slider Animado
         function TabData:AddSlider(text, min, max, default, callback)
             local SliderFrame = Instance.new("Frame")
             SliderFrame.Size = UDim2.new(1, 0, 0, 50)
             SliderFrame.BackgroundColor3 = Theme.ElementBg
             SliderFrame.Parent = TabContentFrame
             CreateCorner(SliderFrame, 6)
-            CreateStroke(SliderFrame, Theme.Border, 1)
+            CreateStroke(SliderFrame, Theme.Border, 1, 0.5)
 
             local Title = Instance.new("TextLabel")
             Title.Size = UDim2.new(1, -20, 0, 20)
@@ -374,7 +448,8 @@ function Library:CreateWindow(title, subtitle)
                 
                 value = math.floor(min + (max - min) * percentage)
                 ValueLabel.Text = tostring(value)
-                BarFill.Size = UDim2.new(percentage, 0, 1, 0)
+                -- Animación del relleno de la barra
+                TweenService:Create(BarFill, TweenInfo.new(0.1), {Size = UDim2.new(percentage, 0, 1, 0)}):Play()
                 
                 if callback then pcall(callback, value) end
             end
@@ -397,7 +472,6 @@ function Library:CreateWindow(title, subtitle)
                 end
             end)
             
-            -- Inicializar visualmente
             local initPercent = (default - min) / (max - min)
             BarFill.Size = UDim2.new(initPercent, 0, 1, 0)
             
@@ -406,7 +480,7 @@ function Library:CreateWindow(title, subtitle)
                     value = math.clamp(val, min, max)
                     local percent = (value - min) / (max - min)
                     ValueLabel.Text = tostring(value)
-                    BarFill.Size = UDim2.new(percent, 0, 1, 0)
+                    TweenService:Create(BarFill, TweenInfo.new(0.2), {Size = UDim2.new(percent, 0, 1, 0)}):Play()
                     if callback then pcall(callback, value) end
                 end
             }
@@ -419,58 +493,42 @@ function Library:CreateWindow(title, subtitle)
 end
 
 -- ==========================================
--- EJEMPLO DE USO (Así se ve en la imagen)
+-- EJEMPLO DE USO
 -- ==========================================
 
 local Window = Library:CreateWindow("Muscle Legends", "By FourHub")
 
--- Pestaña Home
 local HomeTab = Window:CreateTab("Home")
-HomeTab:AddButton("Iniciar Farm", function()
-    print("Farm iniciado...")
-end)
-HomeTab:AddToggle("Auto Rebirth", false, function(state)
-    print("Auto Rebirth:", state)
-end)
+HomeTab:AddButton("Iniciar Farm", function() print("Farm iniciado...") end)
+HomeTab:AddToggle("Auto Rebirth", false, function(state) print("Auto Rebirth:", state) end)
 
--- Pestaña Farm (como en la imagen)
 local FarmTab = Window:CreateTab("Farm")
-FarmTab:AddToggle("Auto Swing", true, function(state)
-    print("Auto Swing:", state)
-end)
+FarmTab:AddToggle("Auto Swing", true, function(state) print("Auto Swing:", state) end)
 FarmTab:AddSlider("Walk Speed", 16, 200, 16, function(value)
-    game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("Humanoid") then
+        game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = value
+    end
 end)
-FarmTab:AddSlider("Size", 1, 10, 2, function(value)
-    -- Lógica para cambiar el tamaño del personaje
-end)
+FarmTab:AddSlider("Size", 1, 10, 2, function(value) end)
 
--- Pestaña Rebirth
 local RebirthTab = Window:CreateTab("Rebirth")
-RebirthTab:AddButton("Rebirth Automático", function()
-    print("Haciendo rebirth...")
-end)
+RebirthTab:AddButton("Rebirth Automático", function() print("Haciendo rebirth...") end)
 RebirthTab:AddToggle("Auto Size", false, function(state) end)
 
--- Pestaña Brawl
 local BrawlTab = Window:CreateTab("Brawl")
 BrawlTab:AddButton("Unirse a Brawl", function() end)
 BrawlTab:AddToggle("Auto Brawl", false, function(state) end)
 
--- Pestaña Pets
 local PetsTab = Window:CreateTab("Pets")
 PetsTab:AddButton("Equipar Mejores Mascotas", function() end)
 PetsTab:AddToggle("Mostrar Mascotas", true, function(state) end)
 
--- Pestaña Rewards
 local RewardsTab = Window:CreateTab("Rewards")
 RewardsTab:AddButton("Reclamar Recompensas", function() end)
 
--- Pestaña Misc / Settings
 local MiscTab = Window:CreateTab("Misc")
 MiscTab:AddToggle("Anti AFK", true, function(state) end)
 MiscTab:AddToggle("Inf Jump", false, function(state)
-    -- Lógica para Inf Jump
     local UIS = game:GetService("UserInputService")
     local player = game.Players.LocalPlayer
     UIS.JumpRequest:Connect(function()
@@ -483,4 +541,4 @@ MiscTab:AddSlider("FOV", 70, 120, 70, function(value)
     workspace.CurrentCamera.FieldOfView = value
 end)
 
-print("UI Cargada correctamente.")
+print("UI Cargada correctamente. Haz clic en el botón morado 'M' para abrir.")
