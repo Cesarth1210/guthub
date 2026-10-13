@@ -1,6 +1,6 @@
 local ui_options = {
 	main_color = Color3.fromRGB(35, 35, 35),
-	min_size = Vector2.new(380, 260), -- Tamaño mediano y compacto
+	min_size = Vector2.new(420, 280),
 	toggle_key = Enum.KeyCode.RightShift,
 	can_resize = true,
 }
@@ -89,9 +89,9 @@ Window.Active = true
 Window.BackgroundColor3 = Color3.new(1, 1, 1)
 Window.BackgroundTransparency = 1
 Window.ClipsDescendants = true
-Window.Position = UDim2.new(0, 20, 0, 20)
+Window.Position = UDim2.new(0, 50, 0, 50)
 Window.Selectable = true
-Window.Size = UDim2.new(0, 380, 0, 260)
+Window.Size = UDim2.new(0, 420, 0, 280)
 Window.Image = "rbxassetid://2851926732"
 Window.ImageColor3 = Color3.fromRGB(15, 15, 18)
 Window.ScaleType = Enum.ScaleType.Slice
@@ -111,57 +111,42 @@ Bar.Parent = Window
 Bar.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
 Bar.BorderSizePixel = 0
 Bar.Position = UDim2.new(0, 0, 0, 0)
-Bar.Size = UDim2.new(1, 0, 0, 32)
+Bar.Size = UDim2.new(1, 0, 0, 30)
+Bar.ZIndex = 2
 
 Toggle.Name = "Toggle"
 Toggle.Parent = Bar
 Toggle.BackgroundColor3 = Color3.new(1, 1, 1)
 Toggle.BackgroundTransparency = 1
-Toggle.Position = UDim2.new(1, -28, 0, 6)
+Toggle.Position = UDim2.new(1, -28, 0, 5)
 Toggle.Size = UDim2.new(0, 20, 0, 20)
-Toggle.ZIndex = 2
+Toggle.ZIndex = 3
 Toggle.Image = "rbxassetid://6035047409"
 
+Title.Name = "Title"
+Title.Parent = Bar
+Title.BackgroundColor3 = Color3.new(1, 1, 1)
+Title.BackgroundTransparency = 1
+Title.Position = UDim2.new(0, 15, 0, 5)
+Title.Size = UDim2.new(0, 250, 0, 20)
+Title.ZIndex = 3
+Title.Font = Enum.Font.GothamBold
+Title.Text = "Muscle Legends"
+Title.TextColor3 = Color3.fromRGB(240, 240, 240)
+Title.TextSize = 14
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
 Base.Name = "Base"
-Base.Parent = Bar
+Base.Parent = Window
 Base.BackgroundColor3 = Color3.fromRGB(22, 22, 26)
 Base.BorderSizePixel = 0
-Base.Position = UDim2.new(0, 0, 1, 0)
+Base.Position = UDim2.new(0, 0, 0, 30)
 Base.Size = UDim2.new(1, 0, 0, 4)
+Base.ZIndex = 2
 Base.Image = "rbxassetid://2851926732"
 Base.ImageColor3 = Color3.fromRGB(22, 22, 26)
 Base.ScaleType = Enum.ScaleType.Slice
 Base.SliceCenter = Rect.new(12, 12, 12, 12)
-
-Top.Name = "Top"
-Top.Parent = Bar
-Top.BackgroundColor3 = Color3.new(1, 1, 1)
-Top.BackgroundTransparency = 1
-Top.Position = UDim2.new(0, 0, 0, 0)
-Top.Size = UDim2.new(1, 0, 0, 4)
-Top.Image = "rbxassetid://2851926732"
-Top.ImageColor3 = Color3.fromRGB(22, 22, 26)
-Top.ScaleType = Enum.ScaleType.Slice
-Top.SliceCenter = Rect.new(12, 12, 12, 12)
-
-Tabs.Name = "Tabs"
-Tabs.Parent = Window
-Tabs.BackgroundColor3 = Color3.new(1, 1, 1)
-Tabs.BackgroundTransparency = 1
-Tabs.Position = UDim2.new(0, 12, 0, 75)
-Tabs.Size = UDim2.new(1, -24, 1, -85)
-
-Title.Name = "Title"
-Title.Parent = Window
-Title.BackgroundColor3 = Color3.new(1, 1, 1)
-Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 15, 0, 6)
-Title.Size = UDim2.new(0, 250, 0, 20)
-Title.Font = Enum.Font.GothamBold
-Title.Text = "Muscle Legends"
-Title.TextColor3 = Color3.fromRGB(240, 240, 240)
-Title.TextSize = 15
-Title.TextXAlignment = Enum.TextXAlignment.Left
 
 TabSelection.Name = "TabSelection"
 TabSelection.Parent = Window
@@ -191,6 +176,13 @@ Frame.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 Frame.BorderSizePixel = 0
 Frame.Position = UDim2.new(0, 0, 1, 0)
 Frame.Size = UDim2.new(1, 0, 0, 1)
+
+Tabs.Name = "Tabs"
+Tabs.Parent = Window
+Tabs.BackgroundColor3 = Color3.new(1, 1, 1)
+Tabs.BackgroundTransparency = 1
+Tabs.Position = UDim2.new(0, 12, 0, 75)
+Tabs.Size = UDim2.new(1, -24, 1, -85)
 
 Tab.Name = "Tab"
 Tab.Parent = Prefabs
@@ -628,7 +620,7 @@ function library:AddWindow(title, options)
 
 	local Window = Prefabs:FindFirstChild("Window"):Clone()
 	Window.Parent = Windows
-	Window:FindFirstChild("Title").Text = title
+	Window:FindFirstChild("Bar"):FindFirstChild("Title").Text = title
 	Window.Size = UDim2.new(0, options.min_size.X, 0, options.min_size.Y)
 	Window.ZIndex = Window.ZIndex + (windows * 10)
 
@@ -690,7 +682,7 @@ function library:AddWindow(title, options)
 					end
 					Resizer.Active = false
 					oldy = Window.AbsoluteSize.Y
-					Resize(Window, {Size = UDim2.new(0, Window.AbsoluteSize.X, 0, 32)}, options.tween_time)
+					Resize(Window, {Size = UDim2.new(0, Window.AbsoluteSize.X, 0, 34)}, options.tween_time)
 				else
 					if Window:FindFirstChild("TabSelection") then
 						Window.TabSelection.Visible = true
