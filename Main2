@@ -5,6 +5,14 @@ local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Stats = game:GetService("Stats")
+local Lighting = game:GetService("Lighting")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+local Workspace = game:GetService("Workspace")
+local StarterGui = game:GetService("StarterGui")
+local LocalPlayer = Players.LocalPlayer
 
 local Theme = {
     Background = Color3.fromRGB(15, 15, 18),
@@ -40,15 +48,18 @@ end
 local function MakeDraggable(frame, dragArea)
     local dragging, dragInput, dragStart, startPos
     local area = dragArea or frame
+    local dragConn
 
     area.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = frame.Position
-            input.Changed:Connect(function()
+            if dragConn then dragConn:Disconnect() end
+            dragConn = input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     dragging = false
+                    if dragConn then dragConn:Disconnect(); dragConn = nil end
                 end
             end)
         end
@@ -73,7 +84,7 @@ function Library:AddWindow(title, options)
     ScreenGui.Name = "DeepUI_Script"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-    
+
     if syn and syn.protect_gui then
         syn.protect_gui(ScreenGui)
         ScreenGui.Parent = CoreGui
@@ -100,6 +111,7 @@ function Library:AddWindow(title, options)
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 650, 0, 420)
     MainFrame.Position = UDim2.new(0.5, -325, 0.5, -210)
+    MainFrame.AnchorPoint = Vector2.new(0, 0)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
     MainFrame.Visible = true
@@ -143,6 +155,7 @@ function Library:AddWindow(title, options)
     TabContainer.Position = UDim2.new(0, 5, 0, 55)
     TabContainer.BackgroundTransparency = 1
     TabContainer.ScrollBarThickness = 2
+    TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabContainer.Parent = Sidebar
 
     local TabListLayout = Instance.new("UIListLayout")
@@ -170,7 +183,7 @@ function Library:AddWindow(title, options)
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = MainFrame
     CreateCorner(CloseBtn, 12)
-    
+
     CloseBtn.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
     end)
@@ -196,6 +209,7 @@ function Library:AddWindow(title, options)
         TabContentFrame.BackgroundTransparency = 1
         TabContentFrame.Visible = false
         TabContentFrame.ScrollBarThickness = 3
+        TabContentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
         TabContentFrame.Parent = ContentContainer
 
         local TabContentLayout = Instance.new("UIListLayout")
@@ -287,16 +301,16 @@ function Library:AddWindow(title, options)
             CreateCorner(SwitchCircle, 10)
 
             local Toggled = false
-            
+
             local function UpdateState()
                 if Toggled then
                     SwitchBg.BackgroundColor3 = Theme.Accent
                     SwitchCircle.Position = UDim2.new(1, -18, 0.5, -8)
-                    SwitchCircle.BackgroundColor3 = Color3.fromRGB(255,255,255)
+                    SwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 else
                     SwitchBg.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
                     SwitchCircle.Position = UDim2.new(0, 2, 0.5, -8)
-                    SwitchCircle.BackgroundColor3 = Color3.fromRGB(200,200,200)
+                    SwitchCircle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
                 end
             end
 
@@ -375,6 +389,7 @@ function Library:AddWindow(title, options)
             ListHolder.Position = UDim2.new(0, 0, 0, 36)
             ListHolder.BackgroundTransparency = 1
             ListHolder.ScrollBarThickness = 2
+            ListHolder.CanvasSize = UDim2.new(0, 0, 0, 0)
             ListHolder.Parent = DropdownFrame
 
             local UIList = Instance.new("UIListLayout")
@@ -472,11 +487,24 @@ function Library:AddWindow(title, options)
             end)
 
             local FolderTabData = {}
-            function FolderTabData:AddButton(text, cb)
-                return TabData.AddButton({ParentContainer = ContentHolder}, text, cb) -- simplified wrapper
+
+            -- Helper: detecta el último hijo agregado y lo mueve al ContentHolder
+            local function reparentNewElement(beforeSet)
+                for _, c in ipairs(TabContentFrame:GetChildren()) do
+                    if not beforeSet[c] and c:IsA("GuiObject") then
+                        c.Parent = ContentHolder
+                        return c
+                    end
+                end
+                return nil
             end
-            
-            -- Redirigir funciones dentro del folder
+
+            local function snapshot()
+                local s = {}
+                for _, c in ipairs(TabContentFrame:GetChildren()) do s[c] = true end
+                return s
+            end
+
             function FolderTabData:AddButton(text, cb)
                 local btn = Instance.new("TextButton")
                 btn.Size = UDim2.new(1, 0, 0, 32)
@@ -493,32 +521,30 @@ function Library:AddWindow(title, options)
             end
 
             function FolderTabData:AddSwitch(text, cb)
+                local s = snapshot()
                 local f = TabData:AddSwitch(text, cb)
-                -- Cambiar parent al content holder del folder
-                -- (Se reubica automáticamente al último hijo creado en TabContentFrame)
-                local lastChild = TabContentFrame:GetChildren()[#TabContentFrame:GetChildren()]
-                if lastChild then lastChild.Parent = ContentHolder end
+                reparentNewElement(s)
                 return f
             end
 
             function FolderTabData:AddTextBox(text, cb)
+                local s = snapshot()
                 local f = TabData:AddTextBox(text, cb)
-                local lastChild = TabContentFrame:GetChildren()[#TabContentFrame:GetChildren()]
-                if lastChild then lastChild.Parent = ContentHolder end
+                reparentNewElement(s)
                 return f
             end
 
             function FolderTabData:AddDropdown(text, cb)
+                local s = snapshot()
                 local f = TabData:AddDropdown(text, cb)
-                local lastChild = TabContentFrame:GetChildren()[#TabContentFrame:GetChildren()]
-                if lastChild then lastChild.Parent = ContentHolder end
+                reparentNewElement(s)
                 return f
             end
 
             function FolderTabData:AddLabel(text)
+                local s = snapshot()
                 local f = TabData:AddLabel(text)
-                local lastChild = TabContentFrame:GetChildren()[#TabContentFrame:GetChildren()]
-                if lastChild then lastChild.Parent = ContentHolder end
+                reparentNewElement(s)
                 return f
             end
 
@@ -534,23 +560,13 @@ end
 -- ==========================================
 -- TU SCRIPT ORIGINAL ADAPTADO
 -- ==========================================
-local player = game.Players.LocalPlayer
-local displayName = player.DisplayName or player.Name
+local displayName = LocalPlayer.DisplayName or LocalPlayer.Name
 
-local window = Library:AddWindow("script new| Bienvenid@ " .. displayName, {
+local window = Library:AddWindow("script new | Bienvenid@ " .. displayName, {
     main_color = Color3.fromRGB(255, 0, 0),
     min_size = Vector2.new(700, 1200),
     can_resize = false,
 })
-
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local Stats = game:GetService("Stats")
-local Lighting = game:GetService("Lighting")
-local VirtualInputManager = game:GetService("VirtualInputManager")
-local Workspace = game:GetService("Workspace")
-local StarterGui = game:GetService("StarterGui")
-local LocalPlayer = Players.LocalPlayer
 
 -- Funciones Auxiliares de Formato
 local function FormatNumber(value)
@@ -631,8 +647,10 @@ task.spawn(function()
     end
 
     local function onCharacterAdded(character)
-        local humanoid = character:WaitForChild("Humanoid")
-        createBillboard(humanoid, character)
+        local humanoid = character:WaitForChild("Humanoid", 10)
+        if humanoid then
+            createBillboard(humanoid, character)
+        end
     end
 
     for _, plr in ipairs(Players:GetPlayers()) do
@@ -652,41 +670,43 @@ MainTab:AddLabel("Important:")
 
 MainTab:AddSwitch("Anti Fling", function(bool)
     local character = Workspace:FindFirstChild(LocalPlayer.Name)
+    if not character then return end
     if bool then
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local bodyVelocity = Instance.new("BodyVelocity")
-            bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
-            bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-            bodyVelocity.P = 1250
-            bodyVelocity.Parent = character.HumanoidRootPart
+        if character:FindFirstChild("HumanoidRootPart") then
+            local existing = character.HumanoidRootPart:FindFirstChild("AntiFlingVelocity")
+            if not existing then
+                local bodyVelocity = Instance.new("BodyVelocity")
+                bodyVelocity.Name = "AntiFlingVelocity"
+                bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
+                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
+                bodyVelocity.P = 1250
+                bodyVelocity.Parent = character.HumanoidRootPart
+            end
         end
     else
-        if character and character:FindFirstChild("HumanoidRootPart") then
-            local existingVelocity = character.HumanoidRootPart:FindFirstChild("BodyVelocity")
+        if character:FindFirstChild("HumanoidRootPart") then
+            local existingVelocity = character.HumanoidRootPart:FindFirstChild("AntiFlingVelocity")
             if existingVelocity then existingVelocity:Destroy() end
         end
     end
 end)
 
-local lockRunning = false
 local lockConnection
 local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
     if Value then
-        lockRunning = true
-        lockConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if lockConnection then lockConnection:Disconnect() end
+        lockConnection = RunService.Heartbeat:Connect(function()
             local char = LocalPlayer.Character
-            if not char or not char:FindFirstChild("HumanoidRootPart") or not char:FindFirstChildOfClass("Humanoid") then return end
-            local hrp = char.HumanoidRootPart
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
             local humanoid = char:FindFirstChildOfClass("Humanoid")
+            if not hrp or not humanoid then return end
 
-            if not humanoid:FindFirstChild("LockState") then
+            if not humanoid:GetAttribute("LockCFrame") then
                 humanoid.WalkSpeed = 0
                 humanoid.JumpPower = 0
                 humanoid.AutoRotate = false
                 humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-                local marker = Instance.new("BoolValue", humanoid)
-                marker.Name = "LockState"
-                marker.Value = true
                 humanoid:SetAttribute("LockCFrame", hrp.CFrame)
             end
 
@@ -698,17 +718,15 @@ local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
             end
         end)
     else
-        lockRunning = false
         if lockConnection then lockConnection:Disconnect(); lockConnection = nil end
         local char = LocalPlayer.Character
         if char then
             local humanoid = char:FindFirstChildOfClass("Humanoid")
             if humanoid then
-                humanoid.WalkSpeed = 250
+                humanoid.WalkSpeed = 16
                 humanoid.JumpPower = 50
                 humanoid.AutoRotate = true
                 humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-                if humanoid:FindFirstChild("LockState") then humanoid.LockState:Destroy() end
                 humanoid:SetAttribute("LockCFrame", nil)
             end
         end
@@ -716,28 +734,35 @@ local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
 end)
 lockSwitch:Set(false)
 
-MainTab:AddSwitch("Show Pets", function(bool)
-    if LocalPlayer:FindFirstChild("hidePets") then LocalPlayer.hidePets.Value = bool end
-end):Set(false)
+local showPetsSwitch = MainTab:AddSwitch("Show Pets", function(bool)
+    local hidePets = LocalPlayer:FindFirstChild("hidePets")
+    if hidePets then hidePets.Value = bool end
+end)
 
-MainTab:AddSwitch("Show Other Pets", function(bool)
-    if LocalPlayer:FindFirstChild("showOtherPetsOn") then LocalPlayer.showOtherPetsOn.Value = bool end
-end):Set(false)
+local showOtherPetsSwitch = MainTab:AddSwitch("Show Other Pets", function(bool)
+    local showOther = LocalPlayer:FindFirstChild("showOtherPetsOn")
+    if showOther then showOther.Value = bool end
+end)
 
 MainTab:AddLabel("Misc:")
 
+local infJumpConnection
 MainTab:AddSwitch("Infinite Jump", function(bool)
     _G.InfiniteJump = bool
     if bool then
-        UserInputService.JumpRequest:Connect(function()
+        if infJumpConnection then infJumpConnection:Disconnect() end
+        infJumpConnection = UserInputService.JumpRequest:Connect(function()
             if _G.InfiniteJump and LocalPlayer.Character then
                 local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if hum then hum:ChangeState("Jumping") end
+                if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
             end
         end)
+    else
+        if infJumpConnection then infJumpConnection:Disconnect(); infJumpConnection = nil end
     end
 end)
 
+-- Crear partes para Walk on Water
 local parts = {}
 local partSize = 2048
 local totalDistance = 50000
@@ -745,20 +770,20 @@ local startPosition = Vector3.new(-2, -9.5, -2)
 
 task.spawn(function()
     local numberOfParts = math.ceil(totalDistance / partSize)
+    local container = Instance.new("Folder")
+    container.Name = "WalkOnWaterParts"
+    container.Parent = Workspace
     for x = 0, numberOfParts - 1 do
         for z = 0, numberOfParts - 1 do
-            local function createPart(pos, name)
-                local part = Instance.new("Part")
-                part.Size = Vector3.new(partSize, 1, partSize)
-                part.Position = pos
-                part.Anchored = true
-                part.Transparency = 1
-                part.CanCollide = true
-                part.Name = name
-                part.Parent = Workspace
-                return part
-            end
-            table.insert(parts, createPart(startPosition + Vector3.new(x * partSize, 0, z * partSize), "Part_"..x.."_"..z))
+            local part = Instance.new("Part")
+            part.Size = Vector3.new(partSize, 1, partSize)
+            part.Position = startPosition + Vector3.new(x * partSize, 0, z * partSize)
+            part.Anchored = true
+            part.Transparency = 1
+            part.CanCollide = false
+            part.Name = "Part_"..x.."_"..z
+            part.Parent = container
+            table.insert(parts, part)
         end
     end
 end)
@@ -789,13 +814,15 @@ AutoFarm:AddSwitch("Strength Op", function(state)
 end)
 
 task.spawn(function()
-    while true do
-        if getgenv()._AutoRepFarmEnabled and LocalPlayer:FindFirstChild("muscleEvent") then
-            for i = 1, 55 do
-                LocalPlayer.muscleEvent:FireServer("rep")
+    while task.wait() do
+        if getgenv()._AutoRepFarmEnabled then
+            local muscleEvent = LocalPlayer:FindFirstChild("muscleEvent")
+            if muscleEvent then
+                for i = 1, 55 do
+                    pcall(function() muscleEvent:FireServer("rep") end)
+                end
             end
         end
-        task.wait()
     end
 end)
 
@@ -806,13 +833,13 @@ end)
 
 task.spawn(function()
     local lastEatTime = 0
-    while true do
+    while task.wait(1) do
         if autoEatEnabled then
             local currentTime = tick()
             if currentTime - lastEatTime >= 1800 or lastEatTime == 0 then
                 local backpack = LocalPlayer:FindFirstChild("Backpack")
                 local char = LocalPlayer.Character
-                local egg = backpack and backpack:FindFirstChild("Protein Egg") or (char and char:FindFirstChild("Protein Egg"))
+                local egg = (backpack and backpack:FindFirstChild("Protein Egg")) or (char and char:FindFirstChild("Protein Egg"))
                 if egg and LocalPlayer:FindFirstChild("muscleEvent") then
                     if egg.Parent == backpack then egg.Parent = char end
                     task.wait(0.1)
@@ -823,7 +850,6 @@ task.spawn(function()
         else
             lastEatTime = 0
         end
-        task.wait(1)
     end
 end)
 
@@ -832,8 +858,18 @@ AutoFarm:AddSwitch("Spin Fortune Wheel", function(state)
     _G.AutoSpinWheel = state
     if state then
         task.spawn(function()
-            local remote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("openFortuneWheelRemote")
-            local chances = ReplicatedStorage:WaitForChild("shared"):WaitForChild("catalogs"):WaitForChild("fortuneWheelChances"):WaitForChild("Fortune Wheel")
+            local rEvents = ReplicatedStorage:WaitForChild("rEvents", 10)
+            if not rEvents then return end
+            local remote = rEvents:WaitForChild("openFortuneWheelRemote", 10)
+            if not remote then return end
+            local shared = ReplicatedStorage:WaitForChild("shared", 10)
+            if not shared then return end
+            local catalogs = shared:WaitForChild("catalogs", 10)
+            if not catalogs then return end
+            local fwChances = catalogs:WaitForChild("fortuneWheelChances", 10)
+            if not fwChances then return end
+            local chances = fwChances:WaitForChild("Fortune Wheel", 10)
+            if not chances then return end
             while _G.AutoSpinWheel do
                 pcall(function() remote:InvokeServer("openFortuneWheel", chances) end)
                 task.wait(0.5)
@@ -844,12 +880,16 @@ end)
 
 AutoFarm:AddButton("Anti Lag", function()
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then v.Enabled = false end
+        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+            pcall(function() v.Enabled = false end)
+        end
     end
     Lighting.GlobalShadows = false
     Lighting.FogEnd = 9e9
     Lighting.Brightness = 0
-    StarterGui:SetCore("SendNotification", {Title = "Anti Lag", Text = "Optimización aplicada", Duration = 3})
+    pcall(function()
+        StarterGui:SetCore("SendNotification", {Title = "Anti Lag", Text = "Optimización aplicada", Duration = 3})
+    end)
 end)
 
 -- Carpetas de opciones secundarias
@@ -862,7 +902,13 @@ rebirthFolder:AddSwitch("Auto Rebirth (Infinitely)", function(bool)
     if bool then
         task.spawn(function()
             while _G.infiniteRebirthActive do
-                pcall(function() ReplicatedStorage.rEvents.rebirthRemote:InvokeServer("rebirthRequest") end)
+                local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
+                if rEvents then
+                    local rem = rEvents:FindFirstChild("rebirthRemote")
+                    if rem then
+                        pcall(function() rem:InvokeServer("rebirthRequest") end)
+                    end
+                end
                 task.wait(0.1)
             end
         end)
