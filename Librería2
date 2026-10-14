@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v3)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -107,7 +107,6 @@ function Library:AddWindow(title, options)
     CreateCorner(ToggleBtn, 22)
     CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
 
-    -- MainFrame grande
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 700, 0, 550)
@@ -153,7 +152,7 @@ function Library:AddWindow(title, options)
     TitleLabel.TextWrapped = true
     TitleLabel.Parent = Sidebar
 
-    -- TabContainer (sidebar con scroll)
+    -- TabContainer
     local TabContainer = Instance.new("ScrollingFrame")
     TabContainer.Size = UDim2.new(1, -10, 1, -70)
     TabContainer.Position = UDim2.new(0, 5, 0, 65)
@@ -163,7 +162,6 @@ function Library:AddWindow(title, options)
     TabContainer.ScrollBarImageTransparency = 0.3
     TabContainer.ScrollingDirection = Enum.ScrollingDirection.Y
     TabContainer.ElasticBehavior = Enum.ElasticBehavior.Never
-    TabContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
     TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabContainer.Parent = Sidebar
 
@@ -176,12 +174,18 @@ function Library:AddWindow(title, options)
         TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 20)
     end)
 
-    -- ✅ AJUSTE 1: ContentContainer más abajo y con más margen
-    local ContentContainer = Instance.new("Frame")
+    -- ✅ ContentContainer ahora ES ScrollingFrame (aquí va el scroll)
+    local ContentContainer = Instance.new("ScrollingFrame")
     ContentContainer.Size = UDim2.new(1, -195, 1, -50)
     ContentContainer.Position = UDim2.new(0, 190, 0, 40)
     ContentContainer.BackgroundTransparency = 1
-    ContentContainer.ClipsDescendants = true
+    ContentContainer.BorderSizePixel = 0
+    ContentContainer.ScrollBarThickness = 6
+    ContentContainer.ScrollBarImageColor3 = Theme.Accent
+    ContentContainer.ScrollBarImageTransparency = 0.2
+    ContentContainer.ScrollingDirection = Enum.ScrollingDirection.Y
+    ContentContainer.ElasticBehavior = Enum.ElasticBehavior.Never
+    ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.Parent = MainFrame
 
     local CloseBtn = Instance.new("TextButton")
@@ -215,17 +219,12 @@ function Library:AddWindow(title, options)
         CreateCorner(TabButton, 6)
         CreateStroke(TabButton, Theme.Border, 1, 0.5)
 
-        -- ✅ AJUSTE 2 + 3: scroll sin AutomaticCanvasSize (funciona en Delta)
-        local TabContentFrame = Instance.new("ScrollingFrame")
-        TabContentFrame.Size = UDim2.new(1, 0, 1, 0)
+        -- ✅ TabContentFrame ahora es Frame normal (el scroll lo maneja ContentContainer)
+        local TabContentFrame = Instance.new("Frame")
+        TabContentFrame.Size = UDim2.new(1, -10, 0, 0)
+        TabContentFrame.Position = UDim2.new(0, 5, 0, 0)
         TabContentFrame.BackgroundTransparency = 1
         TabContentFrame.Visible = false
-        TabContentFrame.ScrollBarThickness = 6
-        TabContentFrame.ScrollBarImageTransparency = 0.2
-        TabContentFrame.ScrollBarImageColor3 = Theme.Accent
-        TabContentFrame.ElasticBehavior = Enum.ElasticBehavior.Never
-        TabContentFrame.ScrollingDirection = Enum.ScrollingDirection.Y
-        TabContentFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
         TabContentFrame.Parent = ContentContainer
 
         local TabContentLayout = Instance.new("UIListLayout")
@@ -233,8 +232,12 @@ function Library:AddWindow(title, options)
         TabContentLayout.Padding = UDim.new(0, 8)
         TabContentLayout.Parent = TabContentFrame
 
+        -- ✅ Ajustar altura del TabContentFrame al contenido real
         TabContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-            TabContentFrame.CanvasSize = UDim2.new(0, 0, 0, TabContentLayout.AbsoluteContentSize.Y + 60)
+            TabContentFrame.Size = UDim2.new(1, -10, 0, TabContentLayout.AbsoluteContentSize.Y + 20)
+            if CurrentTab and CurrentTab.Content == TabContentFrame then
+                ContentContainer.CanvasSize = UDim2.new(0, 0, 0, TabContentLayout.AbsoluteContentSize.Y + 40)
+            end
         end)
 
         local function SelectTab()
@@ -245,6 +248,9 @@ function Library:AddWindow(title, options)
             CurrentTab = {Button = TabButton, Content = TabContentFrame}
             TweenService:Create(TabButton, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.Text}):Play()
             TabContentFrame.Visible = true
+            -- Reset scroll al cambiar de pestaña
+            ContentContainer.CanvasPosition = Vector2.new(0, 0)
+            ContentContainer.CanvasSize = UDim2.new(0, 0, 0, TabContentLayout.AbsoluteContentSize.Y + 40)
         end
 
         TabButton.MouseButton1Click:Connect(SelectTab)
