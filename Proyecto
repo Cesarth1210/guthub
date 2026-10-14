@@ -1,7 +1,3 @@
---// MUSCLE LEGENDS ULTIMATE HUB - MODERN FUCHSIA EDITION
---// Library: Cesarth1210 Modernized
---// Features: All integrated functions from the provided script
-
 local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cesarth1210/guthub/refs/heads/main/Lua1"))()
 
 local player = game.Players.LocalPlayer
@@ -9,7 +5,7 @@ local displayName = player.DisplayName or player.Name
 
 -- ウィンドウ作成 (メインカラーをフューシャピンクに設定)
 local window = library:AddWindow("MUSCLE LEGENDS | " .. displayName, {
-    main_color = Color3.fromRGB(255, 0, 127), 
+    main_color = Color3.fromRGB(255, 0, 127),
     min_size = Vector2.new(600, 450),
     can_resize = true,
 })
@@ -24,6 +20,15 @@ local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
 local RunService = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
+
+-- ✅ FIX: Esperar a que el leaderstats exista antes de usarlo
+local leaderstats = player:WaitForChild("leaderstats", 30)
+if not leaderstats then
+    warn("No se encontró leaderstats")
+    return
+end
+local strengthStat = leaderstats:WaitForChild("Strength")
+local rebirthsStat = leaderstats:WaitForChild("Rebirths")
 
 --==================================================
 -- 🛠️ HELPER FUNCTIONS
@@ -54,7 +59,7 @@ end
 
 task.spawn(function()
     repeat task.wait() until game:IsLoaded()
-    
+
     local function formatNumber(n)
         local suffixes = {{"Qi", 1e18}, {"Qa", 1e15}, {"T", 1e12}, {"B", 1e9}, {"M", 1e6}, {"K", 1e3}}
         for _, s in ipairs(suffixes) do
@@ -83,7 +88,7 @@ task.spawn(function()
         Instance.new("UICorner", frame).CornerRadius = UDim.new(0, 8)
 
         local bar = Instance.new("Frame")
-        bar.BackgroundColor3 = Color3.fromRGB(255, 0, 127) -- フューシャに統一
+        bar.BackgroundColor3 = Color3.fromRGB(255, 0, 127)
         bar.Size = UDim2.new(1, 0, 1, 0)
         bar.Parent = frame
 
@@ -124,52 +129,70 @@ end)
 local MainTab = window:AddTab("Principal")
 MainTab:AddLabel("🛡️ Player Protection", nil).TextSize = 20
 
-MainTab:AddSwitch("Anti Fling", function(bool)
+-- ✅ FIX: Anti Fling ahora reconecta al respawn
+local antiFlingEnabled = false
+local antiFlingConn
+local function applyAntiFling()
+    if not antiFlingEnabled then return end
     local char = player.Character
-    if bool and char then
-        local root = char:FindFirstChild("HumanoidRootPart")
-        if root then
-            local bv = Instance.new("BodyVelocity", root)
-            bv.Name = "AntiFlingBV"
-            bv.MaxForce = Vector3.new(1e5, 0, 1e5)
-            bv.Velocity = Vector3.zero
-            bv.P = 1250
-        end
-    elseif char then
-        local root = char:FindFirstChild("HumanoidRootPart")
-        if root and root:FindFirstChild("AntiFlingBV") then
-            root.AntiFlingBV:Destroy()
+    if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if root and not root:FindFirstChild("AntiFlingBV") then
+        local bv = Instance.new("BodyVelocity", root)
+        bv.Name = "AntiFlingBV"
+        bv.MaxForce = Vector3.new(1e5, 0, 1e5)
+        bv.Velocity = Vector3.zero
+        bv.P = 1250
+    end
+end
+
+MainTab:AddSwitch("Anti Fling", function(bool)
+    antiFlingEnabled = bool
+    if bool then
+        applyAntiFling()
+        if antiFlingConn then antiFlingConn:Disconnect() end
+        antiFlingConn = player.CharacterAdded:Connect(function()
+            task.wait(1)
+            applyAntiFling()
+        end)
+    else
+        if antiFlingConn then antiFlingConn:Disconnect(); antiFlingConn = nil end
+        local char = player.Character
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart")
+            if root and root:FindFirstChild("AntiFlingBV") then
+                root.AntiFlingBV:Destroy()
+            end
         end
     end
 end)
 
-local lockRunning = false
+-- ✅ FIX: Lock Position más estable
 local lockConnection
 MainTab:AddSwitch("Lock Position", function(Value)
     if Value then
-        lockRunning = true
         lockConnection = RunService.Heartbeat:Connect(function()
             local char = player.Character
-            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
-            local hrp = char.HumanoidRootPart
+            if not char then return end
+            local hrp = char:FindFirstChild("HumanoidRootPart")
             local hum = char:FindFirstChildOfClass("Humanoid")
-            if not hum then return end
+            if not hrp or not hum then return end
 
             if not hum:FindFirstChild("LockState") then
                 hum.WalkSpeed = 0; hum.JumpPower = 0; hum.AutoRotate = false
                 hum:ChangeState(Enum.HumanoidStateType.Physics)
-                Instance.new("BoolValue", hum).Name = "LockState"
+                local bv = Instance.new("BoolValue", hum)
+                bv.Name = "LockState"
                 hum:SetAttribute("LockCFrame", hrp.CFrame)
             end
             hrp.CFrame = hum:GetAttribute("LockCFrame") or hrp.CFrame
             hrp.Velocity = Vector3.zero; hrp.RotVelocity = Vector3.zero
         end)
     else
-        lockRunning = false
-        if lockConnection then lockConnection:Disconnect() end
+        if lockConnection then lockConnection:Disconnect(); lockConnection = nil end
         local hum = player.Character and player.Character:FindFirstChildOfClass("Humanoid")
         if hum then
-            hum.WalkSpeed = 250; hum.JumpPower = 50; hum.AutoRotate = true
+            hum.WalkSpeed = 16; hum.JumpPower = 50; hum.AutoRotate = true
             hum:ChangeState(Enum.HumanoidStateType.GettingUp)
             if hum:FindFirstChild("LockState") then hum.LockState:Destroy() end
         end
@@ -181,50 +204,83 @@ MainTab:AddSwitch("Show Other Pets", function(bool) if player:FindFirstChild("sh
 
 MainTab:AddLabel("⚙️ Miscellaneous", nil).TextSize = 20
 
+-- ✅ FIX: Infinite Jump con conexión única
+local infiniteJumpConn
 MainTab:AddSwitch("Infinite Jump", function(bool)
     _G.InfiniteJump = bool
-    if bool then
-        UIS.JumpRequest:Connect(function()
+    if bool and not infiniteJumpConn then
+        infiniteJumpConn = UIS.JumpRequest:Connect(function()
             if _G.InfiniteJump and player.Character then
-                player.Character:FindFirstChildOfClass("Humanoid"):ChangeState("Jumping")
+                local hum = player.Character:FindFirstChildOfClass("Humanoid")
+                if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
             end
         end)
+    elseif not bool and infiniteJumpConn then
+        infiniteJumpConn:Disconnect()
+        infiniteJumpConn = nil
     end
 end)
 
+-- ✅ FIX: Anti-AFK con conexión controlada y UICorner bien aplicado
+local antiAfkConn
 MainTab:AddSwitch("Anti AFK", function(state)
-    getgenv().AntiAfkExecuted = state
     if state then
+        local existing = game.CoreGui:FindFirstChild("AntiAfkPanel")
+        if existing then existing:Destroy() end
+
         local afkGui = Instance.new("ScreenGui", game.CoreGui)
         afkGui.Name = "AntiAfkPanel"
         local frame = Instance.new("Frame", afkGui)
         frame.Size = UDim2.new(0, 200, 0, 100)
         frame.Position = UDim2.new(0, 10, 0, 10)
-        frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-        Instance.new("UICorner", frame)
+        frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        local corner = Instance.new("UICorner", frame)
+        corner.CornerRadius = UDim.new(0, 8)
         local lbl = Instance.new("TextLabel", frame)
-        lbl.Text = "Anti-AFK Active"; lbl.Size = UDim2.new(1,0,0,50); lbl.TextColor3 = Color3.new(1,1,1); lbl.BackgroundTransparency = 1
+        lbl.Text = "Anti-AFK Active"
+        lbl.Size = UDim2.new(1, 0, 1, 0)
+        lbl.TextColor3 = Color3.new(1, 1, 1)
+        lbl.BackgroundTransparency = 1
+        lbl.Font = Enum.Font.GothamBold
 
-        local vu = game:GetService('VirtualUser')
-        player.Idled:Connect(function() vu:CaptureController(); vu:ClickButton2(Vector2.new()) end)
+        if antiAfkConn then antiAfkConn:Disconnect() end
+        antiAfkConn = player.Idled:Connect(function()
+            local vu = game:GetService("VirtualUser")
+            vu:CaptureController()
+            vu:ClickButton2(Vector2.new())
+        end)
     else
-        if game.CoreGui:FindFirstChild("AntiAfkPanel") then game.CoreGui.AntiAfkPanel:Destroy() end
+        if antiAfkConn then antiAfkConn:Disconnect(); antiAfkConn = nil end
+        if game.CoreGui:FindFirstChild("AntiAfkPanel") then
+            game.CoreGui.AntiAfkPanel:Destroy()
+        end
     end
 end)
 
+-- ✅ FIX: Water parts en carpeta separada para fácil limpieza
 local waterParts = {}
+local waterFolder = Instance.new("Folder", workspace)
+waterFolder.Name = "WaterPartsFolder"
 task.spawn(function()
     local startPos = Vector3.new(-2, -9.5, -2)
-    for x = 0, 24 do for z = 0, 24 do 
-        local p = Instance.new("Part", workspace)
-        p.Size = Vector3.new(2048, 1, 2048); p.Position = startPos + Vector3.new(x*2048, 0, z*2048)
-        p.Anchored = true; p.Transparency = 1; p.CanCollide = false; p.Name = "WaterPart"
-        table.insert(waterParts, p)
-    end end
+    for x = 0, 24 do
+        for z = 0, 24 do
+            local p = Instance.new("Part", waterFolder)
+            p.Size = Vector3.new(2048, 1, 2048)
+            p.Position = startPos + Vector3.new(x * 2048, 0, z * 2048)
+            p.Anchored = true
+            p.Transparency = 1
+            p.CanCollide = false
+            p.Name = "WaterPart"
+            table.insert(waterParts, p)
+        end
+    end
 end)
 
 MainTab:AddSwitch("Walk on Water", function(bool)
-    for _, p in ipairs(waterParts) do p.CanCollide = bool end
+    for _, p in ipairs(waterParts) do
+        if p and p.Parent then p.CanCollide = bool end
+    end
 end)
 
 local timeDropdown = MainTab:AddDropdown("Change Time", function(selection)
@@ -240,13 +296,15 @@ timeDropdown:Add("Night"); timeDropdown:Add("Day"); timeDropdown:Add("Midnight")
 
 local AutoFarm = window:AddTab("Farm Op")
 
-getgenv()._AutoRepFarmEnabled = false  
+getgenv()._AutoRepFarmEnabled = false
 AutoFarm:AddSwitch("Strength Op", function(state) getgenv()._AutoRepFarmEnabled = state end)
 
 task.spawn(function()
     while true do
         if getgenv()._AutoRepFarmEnabled and player:FindFirstChild("muscleEvent") then
-            for i = 1, 55 do player.muscleEvent:FireServer("rep") end
+            for i = 1, 55 do
+                pcall(function() player.muscleEvent:FireServer("rep") end)
+            end
         end
         task.wait()
     end
@@ -258,12 +316,12 @@ AutoFarm:AddSwitch("Auto Eat Egg (30m)", function(state) autoEatEnabled = state 
 task.spawn(function()
     local lastEatTime = 0
     while true do
-        if autoEatEnabled then
+        if autoEatEnabled and player:FindFirstChild("muscleEvent") then
             if tick() - lastEatTime >= 1800 or lastEatTime == 0 then
                 local egg = player.Backpack:FindFirstChild("Protein Egg") or player.Character:FindFirstChild("Protein Egg")
-                if egg then 
+                if egg then
                     if egg.Parent == player.Backpack then egg.Parent = player.Character end
-                    player.muscleEvent:FireServer("proteinEgg", egg) 
+                    pcall(function() player.muscleEvent:FireServer("proteinEgg", egg) end)
                 end
                 lastEatTime = tick()
             end
@@ -278,8 +336,11 @@ AutoFarm:AddSwitch("Spin Fortune Wheel", function(state)
     if state then
         task.spawn(function()
             while _G.AutoSpinWheel do
-                pcall(function() 
-                    ReplicatedStorage.rEvents.openFortuneWheelRemote:InvokeServer("openFortuneWheel", ReplicatedStorage.shared.catalogs.fortuneWheelChances["Fortune Wheel"]) 
+                pcall(function()
+                    ReplicatedStorage.rEvents.openFortuneWheelRemote:InvokeServer(
+                        "openFortuneWheel",
+                        ReplicatedStorage.shared.catalogs.fortuneWheelChances["Fortune Wheel"]
+                    )
                 end)
                 task.wait(0.5)
             end
@@ -289,29 +350,64 @@ end)
 
 AutoFarm:AddButton("Anti Lag", function()
     for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then v.Enabled = false end
+        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
+            v.Enabled = false
+        end
     end
-    Lighting.GlobalShadows = false; Lighting.FogEnd = 9e9; Lighting.Brightness = 0
-    settings().Rendering.QualityLevel = 1
+    Lighting.GlobalShadows = false
+    Lighting.FogEnd = 9e9
+    Lighting.Brightness = 0
+    pcall(function() settings().Rendering.QualityLevel = 1 end)
     StarterGui:SetCore("SendNotification", {Title = "Anti Lag", Text = "Optimization Applied!", Duration = 5})
 end)
 
 AutoFarm:AddButton("Equip Swift Samurai", function()
     local petsFolder = player:FindFirstChild("petsFolder")
     if not petsFolder then return end
-    for _, f in pairs(petsFolder:GetChildren()) do if f:IsA("Folder") then for _, p in pairs(f:GetChildren()) do ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", p) end end end
+    for _, f in pairs(petsFolder:GetChildren()) do
+        if f:IsA("Folder") then
+            for _, p in pairs(f:GetChildren()) do
+                pcall(function() ReplicatedStorage.rEvents.equipPetEvent:FireServer("unequipPet", p) end)
+            end
+        end
+    end
     task.wait(0.1)
     local equipped = 0
-    for _, f in pairs(petsFolder:GetChildren()) do if f:IsA("Folder") then for _, p in pairs(f:GetChildren()) do if p.Name == "Swift Samurai" then ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", p); equipped += 1; if equipped >= 8 then return end end end end end
+    for _, f in pairs(petsFolder:GetChildren()) do
+        if f:IsA("Folder") then
+            for _, p in pairs(f:GetChildren()) do
+                if p.Name == "Swift Samurai" then
+                    ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", p)
+                    equipped += 1
+                    if equipped >= 8 then return end
+                end
+            end
+        end
+    end
 end)
 
--- Quick Teleports & Actions (Corregido el error de sintaxis aquí)
-AutoFarm:AddButton("Jungle Squat", function() player.Character.HumanoidRootPart.CFrame = CFrame.new(-8371, 6, 2858); task.wait(0.2); VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game) end)
-AutoFarm:AddButton("Industrial Squat", function() player.Character.HumanoidRootPart.CFrame = CFrame.new(-5217, 61, 5418); task.wait(0.2); VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game) end)
+-- ✅ FIX: Corregido error de sintaxis (paréntesis faltantes en CFrame.new)
+AutoFarm:AddButton("Jungle Squat", function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(-8371, 6, 2858)
+        task.wait(0.2)
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    end
+end)
+
+AutoFarm:AddButton("Industrial Squat", function()
+    if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+        player.Character.HumanoidRootPart.CFrame = CFrame.new(-5217, 61, 5418)
+        task.wait(0.2)
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
+        task.wait(0.05)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+    end
+end)
 
 local fastRebirthFolder = AutoFarm:AddFolder("Fast Rebirth Functions")
-local strengthStat = player:WaitForChild("leaderstats"):WaitForChild("Strength")
-local rebirthsStat = player:WaitForChild("leaderstats"):WaitForChild("Rebirths")
 
 fastRebirthFolder:AddSwitch("Fast Rebirth (Full Auto)", function(state)
     getgenv().AutoFarming = state
@@ -320,9 +416,16 @@ fastRebirthFolder:AddSwitch("Fast Rebirth (Full Auto)", function(state)
             while getgenv().AutoFarming do
                 local req = math.floor(5000 + (2500 * rebirthsStat.Value))
                 while strengthStat.Value < req and getgenv().AutoFarming do
-                    for _ = 1, 27 do player.muscleEvent:FireServer("rep") end; task.wait()
+                    for _ = 1, 27 do
+                        pcall(function() player.muscleEvent:FireServer("rep") end)
+                    end
+                    task.wait()
                 end
-                ReplicatedStorage.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                if getgenv().AutoFarming then
+                    pcall(function()
+                        ReplicatedStorage.rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                    end)
+                end
                 task.wait(0.2)
             end
         end)
@@ -336,18 +439,31 @@ end)
 local Estadisticas = window:AddTab("Estadisticas")
 local SelectPlayerName = ""
 
-local PlayerDrop = Estadisticas:AddDropdown("Select Player", function(val) SelectPlayerName = val:match("| (.+)") end)
-for _, p in pairs(Players:GetPlayers()) do PlayerDrop:Add(p.DisplayName .. " | " .. p.Name) end
+local PlayerDrop = Estadisticas:AddDropdown("Select Player", function(val)
+    SelectPlayerName = val:match("| (.+)") or val
+end)
+for _, p in pairs(Players:GetPlayers()) do
+    PlayerDrop:Add(p.DisplayName .. " | " .. p.Name)
+end
 
-local UpdateLabels = { a = Estadisticas:AddLabel("Strength: N/A"), b = Estadisticas:AddLabel("Gems: N/A"), c = Estadisticas:AddLabel("Rebirths: N/A") }
+local UpdateLabels = {
+    a = Estadisticas:AddLabel("Strength: N/A"),
+    b = Estadisticas:AddLabel("Gems: N/A"),
+    c = Estadisticas:AddLabel("Rebirths: N/A")
+}
 
 task.spawn(function()
     while task.wait(1) do
         local target = SelectPlayerName ~= "" and Players:FindFirstChild(SelectPlayerName) or player
         if target then
-            UpdateLabels.a.Text = "Strength: " .. FormatDisplay(target.leaderstats.Strength.Value)
-            UpdateLabels.b.Text = "Gems: " .. FormatDisplay(target.Gems.Value)
-            UpdateLabels.c.Text = "Rebirths: " .. FormatDisplay(target.leaderstats.Rebirths.Value)
+            pcall(function()
+                UpdateLabels.a.Text = "Strength: " .. FormatDisplay(target.leaderstats.Strength.Value)
+                local gems = target:FindFirstChild("Gems")
+                if gems then
+                    UpdateLabels.b.Text = "Gems: " .. FormatDisplay(gems.Value)
+                end
+                UpdateLabels.c.Text = "Rebirths: " .. FormatDisplay(target.leaderstats.Rebirths.Value)
+            end)
         end
     end
 end)
@@ -364,37 +480,54 @@ local tropicalShakeLabel = GiftTab:AddLabel("Tropical Shakes: 0")
 local selectedProteinPlayer = nil
 local proteinEggCount = 0
 
-local proteinDrop = GiftTab:AddDropdown("Choose Player (Egg)", function(name) selectedProteinPlayer = Players:FindFirstChild(name) end)
-for _, p in ipairs(Players:GetPlayers()) do if p ~= player then proteinDrop:Add(p.Name) end end
+local proteinDrop = GiftTab:AddDropdown("Choose Player (Egg)", function(name)
+    selectedProteinPlayer = Players:FindFirstChild(name)
+end)
+for _, p in ipairs(Players:GetPlayers()) do
+    if p ~= player then proteinDrop:Add(p.Name) end
+end
 
-GiftTab:AddTextBox("Egg Amount", function(t) proteinEggCount = tonumber(t) end)
+GiftTab:AddTextBox("Egg Amount", function(t)
+    proteinEggCount = tonumber(t) or 0
+end)
 
 GiftTab:AddButton("Start Egg Gifting", function()
-    if selectedProteinPlayer and proteinEggCount then
+    if selectedProteinPlayer and proteinEggCount and proteinEggCount > 0 then
         task.spawn(function()
             local folder = player:FindFirstChild("consumablesFolder")
             for i = 1, proteinEggCount do
                 local item = folder and folder:FindFirstChild("Protein Egg")
-                if item then ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedProteinPlayer, item); task.wait(0.1) end
+                if item then
+                    pcall(function()
+                        ReplicatedStorage.rEvents.giftRemote:InvokeServer("giftRequest", selectedProteinPlayer, item)
+                    end)
+                    task.wait(0.1)
+                end
             end
         end)
     end
 end)
 
+-- ✅ FIX: Auto Eat Everything con protección contra errores y detección más amplia
+_G.AutoEatAll = false
 GiftTab:AddSwitch("Auto Eat Everything", function(state)
     _G.AutoEatAll = state
-    task.spawn(function()
-        while _G.AutoEatAll do
-            local items = {"Tropical Shake", "Energy Shake", "Protein Bar", "TOUGH Bar", "Protein Shake", "ULTRA Shake", "Energy Bar"}
-            for _, name in ipairs(items) do
-                local tool = player.Character:FindFirstChild(name) or player.Backpack:FindFirstChild(name)
-                if tool then 
-                    player.muscleEvent:FireServer(name:lower(), tool) 
+    if state then
+        task.spawn(function()
+            while _G.AutoEatAll do
+                local items = {"Tropical Shake", "Energy Shake", "Protein Bar", "TOUGH Bar", "Protein Shake", "ULTRA Shake", "Energy Bar"}
+                for _, name in ipairs(items) do
+                    local tool = player.Character and player.Character:FindFirstChild(name) or player.Backpack:FindFirstChild(name)
+                    if tool and player:FindFirstChild("muscleEvent") then
+                        pcall(function()
+                            player.muscleEvent:FireServer(name:lower(), tool)
+                        end)
+                    end
                 end
+                task.wait(0.1)
             end
-            task.wait(0.1)
-        end
-    end)
+        end)
+    end
 end)
 
 task.spawn(function()
@@ -403,7 +536,8 @@ task.spawn(function()
         local folder = player:FindFirstChild("consumablesFolder")
         if folder then
             for _, item in ipairs(folder:GetChildren()) do
-                if item.Name == "Protein Egg" then pCount += 1 elseif item.Name == "Tropical Shake" then sCount += 1 end
+                if item.Name == "Protein Egg" then pCount += 1
+                elseif item.Name == "Tropical Shake" then sCount += 1 end
             end
         end
         proteinEggLabel.Text = "Protein Eggs: " .. pCount
