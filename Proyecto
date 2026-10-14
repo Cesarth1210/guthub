@@ -192,11 +192,9 @@ MainTab:AddSwitch("Infinite Jump", function(bool)
     end
 end)
 
--- Anti AFK Implementation (Integrated with original logic)
 MainTab:AddSwitch("Anti AFK", function(state)
     getgenv().AntiAfkExecuted = state
     if state then
-        -- Create the Anti-AFK Gui (Simplified based on your script)
         local afkGui = Instance.new("ScreenGui", game.CoreGui)
         afkGui.Name = "AntiAfkPanel"
         local frame = Instance.new("Frame", afkGui)
@@ -214,7 +212,6 @@ MainTab:AddSwitch("Anti AFK", function(state)
     end
 end)
 
--- Water Walk Logic
 local waterParts = {}
 task.spawn(function()
     local startPos = Vector3.new(-2, -9.5, -2)
@@ -308,11 +305,10 @@ AutoFarm:AddButton("Equip Swift Samurai", function()
     for _, f in pairs(petsFolder:GetChildren()) do if f:IsA("Folder") then for _, p in pairs(f:GetChildren()) do if p.Name == "Swift Samurai" then ReplicatedStorage.rEvents.equipPetEvent:FireServer("equipPet", p); equipped += 1; if equipped >= 8 then return end end end end end
 end)
 
--- Quick Teleports & Actions
-AutoFarm:AddButton("Jungle Squat", function() player.Character.HumanoidRootPart.CFrame = CFrame.new(-8371, 6, 2858); task.wait(0.2); VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, EnumH keyCode.E, false, game) end)
-AutoFarm:AddButton("Industrial Squat", function() player.Character.HumanoidRootPart.CFrame = CFrame.new(-5217, 61, 5418); task.wait(0.2); VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, EnumH keyCode.E, false, game) end)
+-- Quick Teleports & Actions (Corregido el error de sintaxis aquí)
+AutoFarm:AddButton("Jungle Squat", function() player.Character.HumanoidRootPart.CFrame = CFrame.new(-8371, 6, 2858); task.wait(0.2); VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game) end)
+AutoFarm:AddButton("Industrial Squat", function() player.Character.HumanoidRootPart.CFrame = CFrame.new(-5217, 61, 5418); task.wait(0.2); VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game); task.wait(0.05); VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game) end)
 
--- Fast Rebirth Section
 local fastRebirthFolder = AutoFarm:AddFolder("Fast Rebirth Functions")
 local strengthStat = player:WaitForChild("leaderstats"):WaitForChild("Strength")
 local rebirthsStat = player:WaitForChild("leaderstats"):WaitForChild("Rebirths")
@@ -323,7 +319,6 @@ fastRebirthFolder:AddSwitch("Fast Rebirth (Full Auto)", function(state)
         task.spawn(function()
             while getgenv().AutoFarming do
                 local req = math.floor(5000 + (2500 * rebirthsStat.Value))
-                -- Swap Pets logic here... (Simplified for integration)
                 while strengthStat.Value < req and getgenv().AutoFarming do
                     for _ = 1, 27 do player.muscleEvent:FireServer("rep") end; task.wait()
                 end
@@ -394,7 +389,6 @@ GiftTab:AddSwitch("Auto Eat Everything", function(state)
             for _, name in ipairs(items) do
                 local tool = player.Character:FindFirstChild(name) or player.Backpack:FindFirstChild(name)
                 if tool then 
-                    -- Format name logic integrated here (Simplified FireServer call)
                     player.muscleEvent:FireServer(name:lower(), tool) 
                 end
             end
@@ -403,7 +397,6 @@ GiftTab:AddSwitch("Auto Eat Everything", function(state)
     end)
 end)
 
--- 更新アイテム数ループ
 task.spawn(function()
     while true do
         local pCount, sCount = 0, 0
