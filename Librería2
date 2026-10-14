@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v4)
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v5)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -96,22 +96,22 @@ function Library:AddWindow(title, options)
 
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-    ToggleBtn.Position = UDim2.new(0, 20, 0.5, -22)
+    ToggleBtn.Size = UDim2.new(0, 40, 0, 40)
+    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -20)
     ToggleBtn.BackgroundColor3 = Theme.Accent
     ToggleBtn.Text = "UI"
     ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleBtn.TextSize = 16
+    ToggleBtn.TextSize = 14
     ToggleBtn.Font = Enum.Font.GothamBold
     ToggleBtn.Parent = ScreenGui
-    CreateCorner(ToggleBtn, 22)
+    CreateCorner(ToggleBtn, 20)
     CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
 
-    -- ✅ AJUSTE 1: MainFrame más pequeño (600x450)
+    -- ✅ AJUSTE: MainFrame más pequeño (550x400) y más abajo
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 600, 0, 450)
-    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -225)
+    MainFrame.Size = UDim2.new(0, 550, 0, 400)
+    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -150) -- ✅ Bajado 50px de la posición original
     MainFrame.AnchorPoint = Vector2.new(0, 0)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
@@ -125,9 +125,9 @@ function Library:AddWindow(title, options)
         MainFrame.Visible = not MainFrame.Visible
     end)
 
-    -- Sidebar más estrecho
+    -- Sidebar
     local Sidebar = Instance.new("Frame")
-    Sidebar.Size = UDim2.new(0, 150, 1, 0)
+    Sidebar.Size = UDim2.new(0, 140, 1, 0)
     Sidebar.BackgroundColor3 = Theme.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
@@ -141,22 +141,24 @@ function Library:AddWindow(title, options)
     SidebarCornerFix.ZIndex = 0
     SidebarCornerFix.Parent = Sidebar
 
+    -- ✅ Título con más espacio arriba y abajo
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -15, 0, 30)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 8)
+    TitleLabel.Size = UDim2.new(1, -15, 0, 32)
+    TitleLabel.Position = UDim2.new(0, 8, 0, 8)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title or "Script Hub"
     TitleLabel.TextColor3 = Theme.Text
-    TitleLabel.TextSize = 12
+    TitleLabel.TextSize = 11
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    TitleLabel.TextYAlignment = Enum.TextYAlignment.Top
     TitleLabel.TextWrapped = true
     TitleLabel.Parent = Sidebar
 
-    -- TabContainer más compacto
+    -- TabContainer
     local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Size = UDim2.new(1, -10, 1, -60)
-    TabContainer.Position = UDim2.new(0, 5, 0, 50)
+    TabContainer.Size = UDim2.new(1, -10, 1, -55)
+    TabContainer.Position = UDim2.new(0, 5, 0, 48)
     TabContainer.BackgroundTransparency = 1
     TabContainer.ScrollBarThickness = 5
     TabContainer.ScrollBarImageColor3 = Theme.Accent
@@ -175,13 +177,13 @@ function Library:AddWindow(title, options)
         TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 15)
     end)
 
-    -- ✅ AJUSTE 2: ContentContainer más abajo y ajustado al nuevo tamaño
+    -- ContentContainer
     local ContentContainer = Instance.new("ScrollingFrame")
-    ContentContainer.Size = UDim2.new(1, -165, 1, -65)
-    ContentContainer.Position = UDim2.new(0, 160, 0, 55)
+    ContentContainer.Size = UDim2.new(1, -155, 1, -60)
+    ContentContainer.Position = UDim2.new(0, 150, 0, 50)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.BorderSizePixel = 0
-    ContentContainer.ScrollBarThickness = 6
+    ContentContainer.ScrollBarThickness = 5
     ContentContainer.ScrollBarImageColor3 = Theme.Accent
     ContentContainer.ScrollBarImageTransparency = 0.2
     ContentContainer.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -213,7 +215,7 @@ function Library:AddWindow(title, options)
         TabButton.BackgroundColor3 = Theme.ElementBg
         TabButton.Text = "  " .. tabName
         TabButton.TextColor3 = Theme.SubText
-        TabButton.TextSize = 12
+        TabButton.TextSize = 11
         TabButton.Font = Enum.Font.GothamMedium
         TabButton.TextXAlignment = Enum.TextXAlignment.Left
         TabButton.Parent = TabContainer
