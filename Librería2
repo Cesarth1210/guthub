@@ -107,10 +107,11 @@ function Library:AddWindow(title, options)
     CreateCorner(ToggleBtn, 22)
     CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
 
+    -- ✅ CAMBIO 1: MainFrame más grande (700x550)
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 650, 0, 420)
-    MainFrame.Position = UDim2.new(0.5, -325, 0.5, -210)
+    MainFrame.Size = UDim2.new(0, 700, 0, 550)
+    MainFrame.Position = UDim2.new(0.5, -350, 0.5, -275)
     MainFrame.AnchorPoint = Vector2.new(0, 0)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
@@ -124,8 +125,9 @@ function Library:AddWindow(title, options)
         MainFrame.Visible = not MainFrame.Visible
     end)
 
+    -- ✅ CAMBIO 2: Sidebar más ancho (180px)
     local Sidebar = Instance.new("Frame")
-    Sidebar.Size = UDim2.new(0, 160, 1, 0)
+    Sidebar.Size = UDim2.new(0, 180, 1, 0)
     Sidebar.BackgroundColor3 = Theme.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
@@ -150,26 +152,31 @@ function Library:AddWindow(title, options)
     TitleLabel.TextWrapped = true
     TitleLabel.Parent = Sidebar
 
+    -- ✅ CAMBIO 3: Scroll visible en el sidebar
     local TabContainer = Instance.new("ScrollingFrame")
     TabContainer.Size = UDim2.new(1, -10, 1, -60)
     TabContainer.Position = UDim2.new(0, 5, 0, 55)
     TabContainer.BackgroundTransparency = 1
-    TabContainer.ScrollBarThickness = 2
+    TabContainer.ScrollBarThickness = 6
+    TabContainer.ScrollBarImageColor3 = Theme.Accent
+    TabContainer.ScrollingDirection = Enum.ScrollingDirection.Y
+    TabContainer.ElasticBehavior = Enum.ElasticBehavior.Never
     TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     TabContainer.Parent = Sidebar
 
     local TabListLayout = Instance.new("UIListLayout")
     TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    TabListLayout.Padding = UDim.new(0, 5)
+    TabListLayout.Padding = UDim.new(0, 4) -- ✅ CAMBIO 4: padding 4px
     TabListLayout.Parent = TabContainer
 
     TabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
         TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 10)
     end)
 
+    -- ✅ CAMBIO 5: ContentContainer ajustado al nuevo sidebar
     local ContentContainer = Instance.new("Frame")
-    ContentContainer.Size = UDim2.new(1, -175, 1, -20)
-    ContentContainer.Position = UDim2.new(0, 170, 0, 10)
+    ContentContainer.Size = UDim2.new(1, -195, 1, -20)
+    ContentContainer.Position = UDim2.new(0, 190, 0, 10)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.Parent = MainFrame
 
@@ -192,8 +199,9 @@ function Library:AddWindow(title, options)
     local CurrentTab = nil
 
     function WindowObj:AddTab(tabName)
+        -- ✅ CAMBIO 4: botón pestaña 30px (antes 34px)
         local TabButton = Instance.new("TextButton")
-        TabButton.Size = UDim2.new(1, -5, 0, 34)
+        TabButton.Size = UDim2.new(1, -5, 0, 30)
         TabButton.BackgroundColor3 = Theme.ElementBg
         TabButton.Text = "   " .. tabName
         TabButton.TextColor3 = Theme.SubText
@@ -488,7 +496,6 @@ function Library:AddWindow(title, options)
 
             local FolderTabData = {}
 
-            -- Helper: detecta el último hijo agregado y lo mueve al ContentHolder
             local function reparentNewElement(beforeSet)
                 for _, c in ipairs(TabContentFrame:GetChildren()) do
                     if not beforeSet[c] and c:IsA("GuiObject") then
@@ -557,386 +564,4 @@ function Library:AddWindow(title, options)
     return WindowObj
 end
 
--- ==========================================
--- TU SCRIPT ORIGINAL ADAPTADO
--- ==========================================
-local displayName = LocalPlayer.DisplayName or LocalPlayer.Name
-
-local window = Library:AddWindow("script new | Bienvenid@ " .. displayName, {
-    main_color = Color3.fromRGB(255, 0, 0),
-    min_size = Vector2.new(700, 1200),
-    can_resize = false,
-})
-
--- Funciones Auxiliares de Formato
-local function FormatNumber(value)
-    local suffixes = {"", "K", "M", "B", "T", "Qa", "Qi"}
-    local index = 1
-    while value >= 1000 and index < #suffixes do
-        value = value / 1000
-        index = index + 1
-    end
-    return string.format("%.2f%s", value, suffixes[index])
-end
-
-local function FormatNumberWithCommas(value)
-    local formatted = tostring(value):reverse():gsub("(%d%d%d)", "%1,"):reverse()
-    return formatted:gsub("^,", "")
-end
-
--- Billboard de Vida
-task.spawn(function()
-    repeat task.wait() until game:IsLoaded()
-    task.wait(1)
-
-    local suffixes = {{"Qi", 1e18}, {"Qa", 1e15}, {"T", 1e12}, {"B", 1e9}, {"M", 1e6}, {"K", 1e3}}
-    local function formatNumber(n)
-        for _, s in ipairs(suffixes) do
-            if n >= s[2] then return string.format("%.2f%s", n / s[2], s[1]) end
-        end
-        return tostring(math.floor(n))
-    end
-
-    local function createBillboard(humanoid, character)
-        if not character:FindFirstChild("Head") then return end
-        local old = character:FindFirstChild("HP_BILLBOARD")
-        if old then old:Destroy() end
-
-        local billboard = Instance.new("BillboardGui")
-        billboard.Name = "HP_BILLBOARD"
-        billboard.Size = UDim2.new(6, 0, 1.2, 0)
-        billboard.StudsOffset = Vector3.new(0, 3.5, 0)
-        billboard.AlwaysOnTop = true
-        billboard.MaxDistance = 200
-        billboard.Parent = character.Head
-
-        local frame = Instance.new("Frame")
-        frame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        frame.BackgroundTransparency = 0.3
-        frame.Size = UDim2.new(1, 0, 1, 0)
-        frame.BorderSizePixel = 0
-        frame.Parent = billboard
-
-        local corner = Instance.new("UICorner")
-        corner.CornerRadius = UDim.new(0, 8)
-        corner.Parent = frame
-
-        local bar = Instance.new("Frame")
-        bar.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
-        bar.Size = UDim2.new(1, 0, 1, 0)
-        bar.BorderSizePixel = 0
-        bar.Parent = frame
-
-        local label = Instance.new("TextLabel")
-        label.BackgroundTransparency = 1
-        label.Size = UDim2.new(1, 0, 1, 0)
-        label.TextColor3 = Color3.new(1, 1, 1)
-        label.Font = Enum.Font.GothamBold
-        label.TextSize = 18
-        label.TextStrokeTransparency = 0.5
-        label.Parent = frame
-
-        local function updateHP()
-            if humanoid and humanoid.Parent then
-                bar.Size = UDim2.new(humanoid.Health / humanoid.MaxHealth, 0, 1, 0)
-                label.Text = formatNumber(humanoid.Health) .. " / " .. formatNumber(humanoid.MaxHealth)
-            end
-        end
-        humanoid.HealthChanged:Connect(updateHP)
-        updateHP()
-    end
-
-    local function onCharacterAdded(character)
-        local humanoid = character:WaitForChild("Humanoid", 10)
-        if humanoid then
-            createBillboard(humanoid, character)
-        end
-    end
-
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr.Character then onCharacterAdded(plr.Character) end
-        plr.CharacterAdded:Connect(onCharacterAdded)
-    end
-    Players.PlayerAdded:Connect(function(plr)
-        plr.CharacterAdded:Connect(onCharacterAdded)
-    end)
-end)
-
--- ==========================================
--- PESTAÑA: PRINCIPAL
--- ==========================================
-local MainTab = window:AddTab("Principal")
-MainTab:AddLabel("Important:")
-
-MainTab:AddSwitch("Anti Fling", function(bool)
-    local character = Workspace:FindFirstChild(LocalPlayer.Name)
-    if not character then return end
-    if bool then
-        if character:FindFirstChild("HumanoidRootPart") then
-            local existing = character.HumanoidRootPart:FindFirstChild("AntiFlingVelocity")
-            if not existing then
-                local bodyVelocity = Instance.new("BodyVelocity")
-                bodyVelocity.Name = "AntiFlingVelocity"
-                bodyVelocity.MaxForce = Vector3.new(100000, 0, 100000)
-                bodyVelocity.Velocity = Vector3.new(0, 0, 0)
-                bodyVelocity.P = 1250
-                bodyVelocity.Parent = character.HumanoidRootPart
-            end
-        end
-    else
-        if character:FindFirstChild("HumanoidRootPart") then
-            local existingVelocity = character.HumanoidRootPart:FindFirstChild("AntiFlingVelocity")
-            if existingVelocity then existingVelocity:Destroy() end
-        end
-    end
-end)
-
-local lockConnection
-local lockSwitch = MainTab:AddSwitch("Lock Position", function(Value)
-    if Value then
-        if lockConnection then lockConnection:Disconnect() end
-        lockConnection = RunService.Heartbeat:Connect(function()
-            local char = LocalPlayer.Character
-            if not char then return end
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if not hrp or not humanoid then return end
-
-            if not humanoid:GetAttribute("LockCFrame") then
-                humanoid.WalkSpeed = 0
-                humanoid.JumpPower = 0
-                humanoid.AutoRotate = false
-                humanoid:ChangeState(Enum.HumanoidStateType.Physics)
-                humanoid:SetAttribute("LockCFrame", hrp.CFrame)
-            end
-
-            local savedCFrame = humanoid:GetAttribute("LockCFrame")
-            if savedCFrame then
-                hrp.Velocity = Vector3.zero
-                hrp.RotVelocity = Vector3.zero
-                hrp.CFrame = savedCFrame
-            end
-        end)
-    else
-        if lockConnection then lockConnection:Disconnect(); lockConnection = nil end
-        local char = LocalPlayer.Character
-        if char then
-            local humanoid = char:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                humanoid.WalkSpeed = 16
-                humanoid.JumpPower = 50
-                humanoid.AutoRotate = true
-                humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-                humanoid:SetAttribute("LockCFrame", nil)
-            end
-        end
-    end
-end)
-lockSwitch:Set(false)
-
-local showPetsSwitch = MainTab:AddSwitch("Show Pets", function(bool)
-    local hidePets = LocalPlayer:FindFirstChild("hidePets")
-    if hidePets then hidePets.Value = bool end
-end)
-
-local showOtherPetsSwitch = MainTab:AddSwitch("Show Other Pets", function(bool)
-    local showOther = LocalPlayer:FindFirstChild("showOtherPetsOn")
-    if showOther then showOther.Value = bool end
-end)
-
-MainTab:AddLabel("Misc:")
-
-local infJumpConnection
-MainTab:AddSwitch("Infinite Jump", function(bool)
-    _G.InfiniteJump = bool
-    if bool then
-        if infJumpConnection then infJumpConnection:Disconnect() end
-        infJumpConnection = UserInputService.JumpRequest:Connect(function()
-            if _G.InfiniteJump and LocalPlayer.Character then
-                local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-                if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-            end
-        end)
-    else
-        if infJumpConnection then infJumpConnection:Disconnect(); infJumpConnection = nil end
-    end
-end)
-
--- Crear partes para Walk on Water
-local parts = {}
-local partSize = 2048
-local totalDistance = 50000
-local startPosition = Vector3.new(-2, -9.5, -2)
-
-task.spawn(function()
-    local numberOfParts = math.ceil(totalDistance / partSize)
-    local container = Instance.new("Folder")
-    container.Name = "WalkOnWaterParts"
-    container.Parent = Workspace
-    for x = 0, numberOfParts - 1 do
-        for z = 0, numberOfParts - 1 do
-            local part = Instance.new("Part")
-            part.Size = Vector3.new(partSize, 1, partSize)
-            part.Position = startPosition + Vector3.new(x * partSize, 0, z * partSize)
-            part.Anchored = true
-            part.Transparency = 1
-            part.CanCollide = false
-            part.Name = "Part_"..x.."_"..z
-            part.Parent = container
-            table.insert(parts, part)
-        end
-    end
-end)
-
-MainTab:AddSwitch("Walk on Water", function(bool)
-    for _, part in ipairs(parts) do
-        if part and part.Parent then part.CanCollide = bool end
-    end
-end)
-
-local timeDropdown = MainTab:AddDropdown("Change Time", function(selection)
-    if selection == "Night" then Lighting.ClockTime = 0
-    elseif selection == "Day" then Lighting.ClockTime = 12
-    elseif selection == "Midnight" then Lighting.ClockTime = 6 end
-end)
-timeDropdown:Add("Night")
-timeDropdown:Add("Day")
-timeDropdown:Add("Midnight")
-
--- ==========================================
--- PESTAÑA: FARM OP
--- ==========================================
-local AutoFarm = window:AddTab("Farm Op")
-
-getgenv()._AutoRepFarmEnabled = false
-AutoFarm:AddSwitch("Strength Op", function(state)
-    getgenv()._AutoRepFarmEnabled = state
-end)
-
-task.spawn(function()
-    while task.wait() do
-        if getgenv()._AutoRepFarmEnabled then
-            local muscleEvent = LocalPlayer:FindFirstChild("muscleEvent")
-            if muscleEvent then
-                for i = 1, 55 do
-                    pcall(function() muscleEvent:FireServer("rep") end)
-                end
-            end
-        end
-    end
-end)
-
-local autoEatEnabled = false
-AutoFarm:AddSwitch("Auto Eat Egg 30 Minuts", function(state)
-    autoEatEnabled = state
-end)
-
-task.spawn(function()
-    local lastEatTime = 0
-    while task.wait(1) do
-        if autoEatEnabled then
-            local currentTime = tick()
-            if currentTime - lastEatTime >= 1800 or lastEatTime == 0 then
-                local backpack = LocalPlayer:FindFirstChild("Backpack")
-                local char = LocalPlayer.Character
-                local egg = (backpack and backpack:FindFirstChild("Protein Egg")) or (char and char:FindFirstChild("Protein Egg"))
-                if egg and LocalPlayer:FindFirstChild("muscleEvent") then
-                    if egg.Parent == backpack then egg.Parent = char end
-                    task.wait(0.1)
-                    pcall(function() LocalPlayer.muscleEvent:FireServer("proteinEgg", egg) end)
-                end
-                lastEatTime = currentTime
-            end
-        else
-            lastEatTime = 0
-        end
-    end
-end)
-
-_G.AutoSpinWheel = false
-AutoFarm:AddSwitch("Spin Fortune Wheel", function(state)
-    _G.AutoSpinWheel = state
-    if state then
-        task.spawn(function()
-            local rEvents = ReplicatedStorage:WaitForChild("rEvents", 10)
-            if not rEvents then return end
-            local remote = rEvents:WaitForChild("openFortuneWheelRemote", 10)
-            if not remote then return end
-            local shared = ReplicatedStorage:WaitForChild("shared", 10)
-            if not shared then return end
-            local catalogs = shared:WaitForChild("catalogs", 10)
-            if not catalogs then return end
-            local fwChances = catalogs:WaitForChild("fortuneWheelChances", 10)
-            if not fwChances then return end
-            local chances = fwChances:WaitForChild("Fortune Wheel", 10)
-            if not chances then return end
-            while _G.AutoSpinWheel do
-                pcall(function() remote:InvokeServer("openFortuneWheel", chances) end)
-                task.wait(0.5)
-            end
-        end)
-    end
-end)
-
-AutoFarm:AddButton("Anti Lag", function()
-    for _, v in pairs(game:GetDescendants()) do
-        if v:IsA("ParticleEmitter") or v:IsA("Smoke") or v:IsA("Fire") or v:IsA("Sparkles") then
-            pcall(function() v.Enabled = false end)
-        end
-    end
-    Lighting.GlobalShadows = false
-    Lighting.FogEnd = 9e9
-    Lighting.Brightness = 0
-    pcall(function()
-        StarterGui:SetCore("SendNotification", {Title = "Anti Lag", Text = "Optimización aplicada", Duration = 3})
-    end)
-end)
-
--- Carpetas de opciones secundarias
-local fastStrengthFolder = AutoFarm:AddFolder("Fast Rebirth Config")
-fastStrengthFolder:AddLabel("Sistema activo de entrenamiento")
-
-local rebirthFolder = AutoFarm:AddFolder("Rebirths Without Packs")
-rebirthFolder:AddSwitch("Auto Rebirth (Infinitely)", function(bool)
-    _G.infiniteRebirthActive = bool
-    if bool then
-        task.spawn(function()
-            while _G.infiniteRebirthActive do
-                local rEvents = ReplicatedStorage:FindFirstChild("rEvents")
-                if rEvents then
-                    local rem = rEvents:FindFirstChild("rebirthRemote")
-                    if rem then
-                        pcall(function() rem:InvokeServer("rebirthRequest") end)
-                    end
-                end
-                task.wait(0.1)
-            end
-        end)
-    end
-end)
-
--- ==========================================
--- PESTAÑA: ESTADÍSTICAS
--- ==========================================
-local estadisticas = window:AddTab("Estadisticas")
-estadisticas:AddLabel("Información del Jugador")
-
-local updateLabelStrength = estadisticas:AddLabel("Strength: N/A")
-local updateLabelGems = estadisticas:AddLabel("Gems: N/A")
-local updateLabelRebirth = estadisticas:AddLabel("Rebirths: N/A")
-
-task.spawn(function()
-    while task.wait(0.5) do
-        local stats = LocalPlayer:FindFirstChild("leaderstats")
-        if stats then
-            local str = stats:FindFirstChild("Strength")
-            local reb = stats:FindFirstChild("Rebirths")
-            local gems = LocalPlayer:FindFirstChild("Gems")
-            if str then updateLabelStrength.Text = "Strength: " .. FormatNumber(str.Value) end
-            if reb then updateLabelRebirth.Text = "Rebirths: " .. FormatNumber(reb.Value) end
-            if gems then updateLabelGems.Text = "Gems: " .. FormatNumber(gems.Value) end
-        end
-    end
-end)
-
-print("¡Script cargado con éxito en la nueva librería!")
+return Library
