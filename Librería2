@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v3)
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v4)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -107,10 +107,11 @@ function Library:AddWindow(title, options)
     CreateCorner(ToggleBtn, 22)
     CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
 
+    -- ✅ AJUSTE 1: MainFrame más pequeño (600x450)
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
-    MainFrame.Size = UDim2.new(0, 700, 0, 550)
-    MainFrame.Position = UDim2.new(0.5, -350, 0.5, -275)
+    MainFrame.Size = UDim2.new(0, 600, 0, 450)
+    MainFrame.Position = UDim2.new(0.5, -300, 0.5, -225)
     MainFrame.AnchorPoint = Vector2.new(0, 0)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
@@ -124,9 +125,9 @@ function Library:AddWindow(title, options)
         MainFrame.Visible = not MainFrame.Visible
     end)
 
-    -- Sidebar
+    -- Sidebar más estrecho
     local Sidebar = Instance.new("Frame")
-    Sidebar.Size = UDim2.new(0, 180, 1, 0)
+    Sidebar.Size = UDim2.new(0, 150, 1, 0)
     Sidebar.BackgroundColor3 = Theme.Sidebar
     Sidebar.BorderSizePixel = 0
     Sidebar.Parent = MainFrame
@@ -141,23 +142,23 @@ function Library:AddWindow(title, options)
     SidebarCornerFix.Parent = Sidebar
 
     local TitleLabel = Instance.new("TextLabel")
-    TitleLabel.Size = UDim2.new(1, -15, 0, 35)
-    TitleLabel.Position = UDim2.new(0, 10, 0, 12)
+    TitleLabel.Size = UDim2.new(1, -15, 0, 30)
+    TitleLabel.Position = UDim2.new(0, 10, 0, 8)
     TitleLabel.BackgroundTransparency = 1
     TitleLabel.Text = title or "Script Hub"
     TitleLabel.TextColor3 = Theme.Text
-    TitleLabel.TextSize = 14
+    TitleLabel.TextSize = 12
     TitleLabel.Font = Enum.Font.GothamBold
     TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
     TitleLabel.TextWrapped = true
     TitleLabel.Parent = Sidebar
 
-    -- TabContainer
+    -- TabContainer más compacto
     local TabContainer = Instance.new("ScrollingFrame")
-    TabContainer.Size = UDim2.new(1, -10, 1, -70)
-    TabContainer.Position = UDim2.new(0, 5, 0, 65)
+    TabContainer.Size = UDim2.new(1, -10, 1, -60)
+    TabContainer.Position = UDim2.new(0, 5, 0, 50)
     TabContainer.BackgroundTransparency = 1
-    TabContainer.ScrollBarThickness = 6
+    TabContainer.ScrollBarThickness = 5
     TabContainer.ScrollBarImageColor3 = Theme.Accent
     TabContainer.ScrollBarImageTransparency = 0.3
     TabContainer.ScrollingDirection = Enum.ScrollingDirection.Y
@@ -167,17 +168,17 @@ function Library:AddWindow(title, options)
 
     local TabListLayout = Instance.new("UIListLayout")
     TabListLayout.SortOrder = Enum.SortOrder.LayoutOrder
-    TabListLayout.Padding = UDim.new(0, 4)
+    TabListLayout.Padding = UDim.new(0, 3)
     TabListLayout.Parent = TabContainer
 
     TabListLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-        TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 20)
+        TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 15)
     end)
 
-    -- ✅ ContentContainer ahora ES ScrollingFrame (aquí va el scroll)
+    -- ✅ AJUSTE 2: ContentContainer más abajo y ajustado al nuevo tamaño
     local ContentContainer = Instance.new("ScrollingFrame")
-    ContentContainer.Size = UDim2.new(1, -195, 1, -50)
-    ContentContainer.Position = UDim2.new(0, 190, 0, 40)
+    ContentContainer.Size = UDim2.new(1, -165, 1, -65)
+    ContentContainer.Position = UDim2.new(0, 160, 0, 55)
     ContentContainer.BackgroundTransparency = 1
     ContentContainer.BorderSizePixel = 0
     ContentContainer.ScrollBarThickness = 6
@@ -189,15 +190,15 @@ function Library:AddWindow(title, options)
     ContentContainer.Parent = MainFrame
 
     local CloseBtn = Instance.new("TextButton")
-    CloseBtn.Size = UDim2.new(0, 24, 0, 24)
-    CloseBtn.Position = UDim2.new(1, -32, 0, 10)
+    CloseBtn.Size = UDim2.new(0, 22, 0, 22)
+    CloseBtn.Position = UDim2.new(1, -30, 0, 8)
     CloseBtn.BackgroundColor3 = Color3.fromRGB(255, 70, 70)
     CloseBtn.Text = "X"
     CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    CloseBtn.TextSize = 12
+    CloseBtn.TextSize = 11
     CloseBtn.Font = Enum.Font.GothamBold
     CloseBtn.Parent = MainFrame
-    CreateCorner(CloseBtn, 12)
+    CreateCorner(CloseBtn, 11)
 
     CloseBtn.MouseButton1Click:Connect(function()
         ScreenGui:Destroy()
@@ -208,18 +209,17 @@ function Library:AddWindow(title, options)
 
     function WindowObj:AddTab(tabName)
         local TabButton = Instance.new("TextButton")
-        TabButton.Size = UDim2.new(1, -5, 0, 30)
+        TabButton.Size = UDim2.new(1, -5, 0, 28)
         TabButton.BackgroundColor3 = Theme.ElementBg
-        TabButton.Text = "   " .. tabName
+        TabButton.Text = "  " .. tabName
         TabButton.TextColor3 = Theme.SubText
-        TabButton.TextSize = 13
+        TabButton.TextSize = 12
         TabButton.Font = Enum.Font.GothamMedium
         TabButton.TextXAlignment = Enum.TextXAlignment.Left
         TabButton.Parent = TabContainer
         CreateCorner(TabButton, 6)
         CreateStroke(TabButton, Theme.Border, 1, 0.5)
 
-        -- ✅ TabContentFrame ahora es Frame normal (el scroll lo maneja ContentContainer)
         local TabContentFrame = Instance.new("Frame")
         TabContentFrame.Size = UDim2.new(1, -10, 0, 0)
         TabContentFrame.Position = UDim2.new(0, 5, 0, 0)
@@ -229,10 +229,9 @@ function Library:AddWindow(title, options)
 
         local TabContentLayout = Instance.new("UIListLayout")
         TabContentLayout.SortOrder = Enum.SortOrder.LayoutOrder
-        TabContentLayout.Padding = UDim.new(0, 8)
+        TabContentLayout.Padding = UDim.new(0, 6)
         TabContentLayout.Parent = TabContentFrame
 
-        -- ✅ Ajustar altura del TabContentFrame al contenido real
         TabContentLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
             TabContentFrame.Size = UDim2.new(1, -10, 0, TabContentLayout.AbsoluteContentSize.Y + 20)
             if CurrentTab and CurrentTab.Content == TabContentFrame then
@@ -248,7 +247,6 @@ function Library:AddWindow(title, options)
             CurrentTab = {Button = TabButton, Content = TabContentFrame}
             TweenService:Create(TabButton, TweenInfo.new(0.2), {BackgroundColor3 = Theme.Accent, TextColor3 = Theme.Text}):Play()
             TabContentFrame.Visible = true
-            -- Reset scroll al cambiar de pestaña
             ContentContainer.CanvasPosition = Vector2.new(0, 0)
             ContentContainer.CanvasSize = UDim2.new(0, 0, 0, TabContentLayout.AbsoluteContentSize.Y + 40)
         end
@@ -260,24 +258,25 @@ function Library:AddWindow(title, options)
 
         function TabData:AddLabel(labelText)
             local Label = Instance.new("TextLabel")
-            Label.Size = UDim2.new(1, -5, 0, 24)
+            Label.Size = UDim2.new(1, -5, 0, 20)
             Label.BackgroundTransparency = 1
             Label.Text = labelText or ""
             Label.TextColor3 = Theme.Text
-            Label.TextSize = 14
+            Label.TextSize = 12
             Label.Font = Enum.Font.GothamMedium
             Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.TextWrapped = true
             Label.Parent = TabContentFrame
             return Label
         end
 
         function TabData:AddButton(buttonText, callback)
             local Btn = Instance.new("TextButton")
-            Btn.Size = UDim2.new(1, -5, 0, 36)
+            Btn.Size = UDim2.new(1, -5, 0, 32)
             Btn.BackgroundColor3 = Theme.ElementBg
             Btn.Text = buttonText
             Btn.TextColor3 = Theme.Text
-            Btn.TextSize = 13
+            Btn.TextSize = 12
             Btn.Font = Enum.Font.GothamMedium
             Btn.Parent = TabContentFrame
             CreateCorner(Btn, 6)
@@ -291,47 +290,47 @@ function Library:AddWindow(title, options)
 
         function TabData:AddSwitch(switchText, callback)
             local ToggleFrame = Instance.new("Frame")
-            ToggleFrame.Size = UDim2.new(1, -5, 0, 36)
+            ToggleFrame.Size = UDim2.new(1, -5, 0, 32)
             ToggleFrame.BackgroundColor3 = Theme.ElementBg
             ToggleFrame.Parent = TabContentFrame
             CreateCorner(ToggleFrame, 6)
             CreateStroke(ToggleFrame, Theme.Border, 1, 0.5)
 
             local Label = Instance.new("TextLabel")
-            Label.Size = UDim2.new(1, -60, 1, 0)
+            Label.Size = UDim2.new(1, -55, 1, 0)
             Label.Position = UDim2.new(0, 10, 0, 0)
             Label.BackgroundTransparency = 1
             Label.Text = switchText
             Label.TextColor3 = Theme.Text
-            Label.TextSize = 13
+            Label.TextSize = 12
             Label.Font = Enum.Font.GothamMedium
             Label.TextXAlignment = Enum.TextXAlignment.Left
             Label.Parent = ToggleFrame
 
             local SwitchBg = Instance.new("Frame")
-            SwitchBg.Size = UDim2.new(0, 40, 0, 20)
-            SwitchBg.Position = UDim2.new(1, -50, 0.5, -10)
+            SwitchBg.Size = UDim2.new(0, 36, 0, 18)
+            SwitchBg.Position = UDim2.new(1, -45, 0.5, -9)
             SwitchBg.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
             SwitchBg.Parent = ToggleFrame
-            CreateCorner(SwitchBg, 10)
+            CreateCorner(SwitchBg, 9)
 
             local SwitchCircle = Instance.new("Frame")
-            SwitchCircle.Size = UDim2.new(0, 16, 0, 16)
-            SwitchCircle.Position = UDim2.new(0, 2, 0.5, -8)
+            SwitchCircle.Size = UDim2.new(0, 14, 0, 14)
+            SwitchCircle.Position = UDim2.new(0, 2, 0.5, -7)
             SwitchCircle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
             SwitchCircle.Parent = SwitchBg
-            CreateCorner(SwitchCircle, 10)
+            CreateCorner(SwitchCircle, 9)
 
             local Toggled = false
 
             local function UpdateState()
                 if Toggled then
                     SwitchBg.BackgroundColor3 = Theme.Accent
-                    SwitchCircle.Position = UDim2.new(1, -18, 0.5, -8)
+                    SwitchCircle.Position = UDim2.new(1, -16, 0.5, -7)
                     SwitchCircle.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
                 else
                     SwitchBg.BackgroundColor3 = Color3.fromRGB(50, 50, 60)
-                    SwitchCircle.Position = UDim2.new(0, 2, 0.5, -8)
+                    SwitchCircle.Position = UDim2.new(0, 2, 0.5, -7)
                     SwitchCircle.BackgroundColor3 = Color3.fromRGB(200, 200, 200)
                 end
             end
@@ -360,7 +359,7 @@ function Library:AddWindow(title, options)
 
         function TabData:AddTextBox(textboxText, callback)
             local BoxFrame = Instance.new("Frame")
-            BoxFrame.Size = UDim2.new(1, -5, 0, 36)
+            BoxFrame.Size = UDim2.new(1, -5, 0, 32)
             BoxFrame.BackgroundColor3 = Theme.ElementBg
             BoxFrame.Parent = TabContentFrame
             CreateCorner(BoxFrame, 6)
@@ -374,7 +373,7 @@ function Library:AddWindow(title, options)
             TextBoxObj.Text = ""
             TextBoxObj.TextColor3 = Theme.Text
             TextBoxObj.PlaceholderColor3 = Theme.SubText
-            TextBoxObj.TextSize = 13
+            TextBoxObj.TextSize = 12
             TextBoxObj.Font = Enum.Font.GothamMedium
             TextBoxObj.TextXAlignment = Enum.TextXAlignment.Left
             TextBoxObj.Parent = BoxFrame
@@ -389,7 +388,7 @@ function Library:AddWindow(title, options)
 
         function TabData:AddDropdown(dropdownName, callback)
             local DropdownFrame = Instance.new("Frame")
-            DropdownFrame.Size = UDim2.new(1, -5, 0, 36)
+            DropdownFrame.Size = UDim2.new(1, -5, 0, 32)
             DropdownFrame.BackgroundColor3 = Theme.ElementBg
             DropdownFrame.ClipsDescendants = true
             DropdownFrame.Parent = TabContentFrame
@@ -397,18 +396,18 @@ function Library:AddWindow(title, options)
             CreateStroke(DropdownFrame, Theme.Border, 1, 0.5)
 
             local DropdownBtn = Instance.new("TextButton")
-            DropdownBtn.Size = UDim2.new(1, 0, 0, 36)
+            DropdownBtn.Size = UDim2.new(1, 0, 0, 32)
             DropdownBtn.BackgroundTransparency = 1
             DropdownBtn.Text = "  " .. dropdownName
             DropdownBtn.TextColor3 = Theme.Text
-            DropdownBtn.TextSize = 13
+            DropdownBtn.TextSize = 12
             DropdownBtn.Font = Enum.Font.GothamMedium
             DropdownBtn.TextXAlignment = Enum.TextXAlignment.Left
             DropdownBtn.Parent = DropdownFrame
 
             local ListHolder = Instance.new("ScrollingFrame")
             ListHolder.Size = UDim2.new(1, 0, 0, 0)
-            ListHolder.Position = UDim2.new(0, 0, 0, 36)
+            ListHolder.Position = UDim2.new(0, 0, 0, 32)
             ListHolder.BackgroundTransparency = 1
             ListHolder.ScrollBarThickness = 2
             ListHolder.CanvasSize = UDim2.new(0, 0, 0, 0)
@@ -423,8 +422,8 @@ function Library:AddWindow(title, options)
 
             DropdownBtn.MouseButton1Click:Connect(function()
                 isOpen = not isOpen
-                local targetHeight = isOpen and math.min(#items * 32, 140) or 0
-                TweenService:Create(DropdownFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 36 + targetHeight)}):Play()
+                local targetHeight = isOpen and math.min(#items * 28, 120) or 0
+                TweenService:Create(DropdownFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 32 + targetHeight)}):Play()
                 TweenService:Create(ListHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, targetHeight)}):Play()
             end)
 
@@ -432,11 +431,11 @@ function Library:AddWindow(title, options)
             function DropdownObj:Add(itemText)
                 table.insert(items, itemText)
                 local ItemBtn = Instance.new("TextButton")
-                ItemBtn.Size = UDim2.new(1, 0, 0, 32)
+                ItemBtn.Size = UDim2.new(1, 0, 0, 28)
                 ItemBtn.BackgroundColor3 = Theme.ElementBg
                 ItemBtn.Text = "  " .. itemText
                 ItemBtn.TextColor3 = Theme.SubText
-                ItemBtn.TextSize = 12
+                ItemBtn.TextSize = 11
                 ItemBtn.Font = Enum.Font.Gotham
                 ItemBtn.TextXAlignment = Enum.TextXAlignment.Left
                 ItemBtn.Parent = ListHolder
@@ -444,11 +443,11 @@ function Library:AddWindow(title, options)
                 ItemBtn.MouseButton1Click:Connect(function()
                     isOpen = false
                     DropdownBtn.Text = "  " .. dropdownName .. ": " .. itemText
-                    TweenService:Create(DropdownFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 36)}):Play()
+                    TweenService:Create(DropdownFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 32)}):Play()
                     TweenService:Create(ListHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 0)}):Play()
                     if callback then pcall(callback, itemText) end
                 end)
-                ListHolder.CanvasSize = UDim2.new(0, 0, 0, #items * 32)
+                ListHolder.CanvasSize = UDim2.new(0, 0, 0, #items * 28)
             end
 
             function DropdownObj:Remove(itemText)
@@ -464,7 +463,7 @@ function Library:AddWindow(title, options)
 
         function TabData:AddFolder(folderName)
             local FolderFrame = Instance.new("Frame")
-            FolderFrame.Size = UDim2.new(1, -5, 0, 36)
+            FolderFrame.Size = UDim2.new(1, -5, 0, 32)
             FolderFrame.BackgroundColor3 = Theme.Sidebar
             FolderFrame.ClipsDescendants = true
             FolderFrame.Parent = TabContentFrame
@@ -472,24 +471,24 @@ function Library:AddWindow(title, options)
             CreateStroke(FolderFrame, Theme.Border, 1, 0.5)
 
             local FolderBtn = Instance.new("TextButton")
-            FolderBtn.Size = UDim2.new(1, 0, 0, 36)
+            FolderBtn.Size = UDim2.new(1, 0, 0, 32)
             FolderBtn.BackgroundTransparency = 1
             FolderBtn.Text = "  📁 " .. folderName
             FolderBtn.TextColor3 = Theme.Text
-            FolderBtn.TextSize = 13
+            FolderBtn.TextSize = 12
             FolderBtn.Font = Enum.Font.GothamBold
             FolderBtn.TextXAlignment = Enum.TextXAlignment.Left
             FolderBtn.Parent = FolderFrame
 
             local ContentHolder = Instance.new("Frame")
             ContentHolder.Size = UDim2.new(1, -10, 0, 0)
-            ContentHolder.Position = UDim2.new(0, 5, 0, 40)
+            ContentHolder.Position = UDim2.new(0, 5, 0, 36)
             ContentHolder.BackgroundTransparency = 1
             ContentHolder.Parent = FolderFrame
 
             local FolderLayout = Instance.new("UIListLayout")
             FolderLayout.SortOrder = Enum.SortOrder.LayoutOrder
-            FolderLayout.Padding = UDim.new(0, 6)
+            FolderLayout.Padding = UDim.new(0, 5)
             FolderLayout.Parent = ContentHolder
 
             local isOpen = false
@@ -497,14 +496,14 @@ function Library:AddWindow(title, options)
             FolderBtn.MouseButton1Click:Connect(function()
                 isOpen = not isOpen
                 local contentHeight = FolderLayout.AbsoluteContentSize.Y + 10
-                local targetHeight = isOpen and (contentHeight + 45) or 36
+                local targetHeight = isOpen and (contentHeight + 40) or 32
                 TweenService:Create(FolderFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, targetHeight)}):Play()
             end)
 
             FolderLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
                 if isOpen then
                     local contentHeight = FolderLayout.AbsoluteContentSize.Y + 10
-                    FolderFrame.Size = UDim2.new(1, -5, 0, contentHeight + 45)
+                    FolderFrame.Size = UDim2.new(1, -5, 0, contentHeight + 40)
                 end
             end)
 
@@ -528,11 +527,11 @@ function Library:AddWindow(title, options)
 
             function FolderTabData:AddButton(text, cb)
                 local btn = Instance.new("TextButton")
-                btn.Size = UDim2.new(1, 0, 0, 32)
+                btn.Size = UDim2.new(1, 0, 0, 28)
                 btn.BackgroundColor3 = Theme.ElementBg
                 btn.Text = text
                 btn.TextColor3 = Theme.Text
-                btn.TextSize = 12
+                btn.TextSize = 11
                 btn.Font = Enum.Font.GothamMedium
                 btn.Parent = ContentHolder
                 CreateCorner(btn, 6)
