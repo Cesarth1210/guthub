@@ -1,4 +1,12 @@
-local library = loadstring(game:HttpGet("https://raw.githubusercontent.com/Cesarth1210/guthub/refs/heads/main/Librería2"))()[span_3](start_span)[span_3](end_span)
+-- ✅ CORREGIDO: carga segura de la librería
+local success, library = pcall(function()
+    return loadstring(game:HttpGet("https://raw.githubusercontent.com/Cesarth1210/guthub/refs/heads/main/Librer%C3%ADa2"))()
+end)
+
+if not success or not library then
+    warn("[ERROR] No se pudo cargar la librería. Verifica la URL o si el archivo existe.")
+    return
+end
 
 local player = game.Players.LocalPlayer
 local displayName = player.DisplayName or player.Name
@@ -7,7 +15,7 @@ local window = library:AddWindow("script new| Bienvenid@ " .. displayName, {
     main_color = Color3.fromRGB(255, 0, 0),
     min_size = Vector2.new(700, 1200),
     can_resize = false,
-})[span_4](start_span)[span_4](end_span)
+})
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
@@ -17,7 +25,7 @@ local VirtualInputManager = game:GetService("VirtualInputManager")
 local Workspace = game:GetService("Workspace")
 local StarterGui = game:GetService("StarterGui")
 
-local LocalPlayer = Players.LocalPlayer[span_5](start_span)[span_5](end_span)
+local LocalPlayer = Players.LocalPlayer
 
 local function FormatNumber(value)
     local suffixes = {"", "K", "M", "B", "T", "Qa", "Qi"}
