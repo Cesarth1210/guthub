@@ -11,7 +11,7 @@ local LocalPlayer = Players.LocalPlayer
 -- 1. WHITELIST Y ACCESO
 ----------------------------------------------------------------
 local allowedUsernames = {
-    "afxxxd3",
+    "Afxxxd3",
 }
 
 local isAllowed = false
