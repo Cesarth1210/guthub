@@ -549,7 +549,7 @@ function Library:AddWindow(title, options)
             end)
 
             FolderLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                if isOpen me
+                if isOpen then
                     local contentHeight = FolderLayout.AbsoluteContentSize.Y + 10
                     FolderFrame.Size = UDim2.new(1, -5, 0, contentHeight + 40)
                 end
