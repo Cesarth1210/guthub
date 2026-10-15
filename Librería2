@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v5)
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v6)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -26,6 +26,9 @@ local Theme = {
     Border = Color3.fromRGB(55, 55, 65),
     Shadow = Color3.fromRGB(0, 0, 0)
 }
+
+-- ⚠️ CAMBIA ESTO por la URL raw de tu imagen subida a GitHub
+local TOGGLE_IMAGE_URL = "https://raw.githubusercontent.com/Cesarth1210/guthub/refs/heads/main/icon.png"
 
 local Library = {}
 
@@ -94,24 +97,24 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
-    local ToggleBtn = Instance.new("TextButton")
+    -- ✅ CAMBIO 1: Botón con imagen en vez de "UI"
+    local ToggleBtn = Instance.new("ImageButton")
     ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 40, 0, 40)
-    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -20)
+    ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
+    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -25)
     ToggleBtn.BackgroundColor3 = Theme.Accent
-    ToggleBtn.Text = "UI"
-    ToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleBtn.TextSize = 14
-    ToggleBtn.Font = Enum.Font.GothamBold
+    ToggleBtn.BackgroundTransparency = 0.2
+    ToggleBtn.Image = TOGGLE_IMAGE_URL
+    ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
+    ToggleBtn.ScaleType = Enum.ScaleType.Fit
     ToggleBtn.Parent = ScreenGui
-    CreateCorner(ToggleBtn, 20)
-    CreateStroke(ToggleBtn, Color3.fromRGB(255, 255, 255), 2, 0.5)
+    CreateCorner(ToggleBtn, 25)
+    CreateStroke(ToggleBtn, Theme.Accent, 2, 0)
 
-    -- ✅ AJUSTE: MainFrame más pequeño (550x400) y más abajo
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Size = UDim2.new(0, 550, 0, 400)
-    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -150) -- ✅ Bajado 50px de la posición original
+    MainFrame.Position = UDim2.new(0.5, -275, 0.5, -150)
     MainFrame.AnchorPoint = Vector2.new(0, 0)
     MainFrame.BackgroundColor3 = Theme.Background
     MainFrame.BorderSizePixel = 0
@@ -125,7 +128,6 @@ function Library:AddWindow(title, options)
         MainFrame.Visible = not MainFrame.Visible
     end)
 
-    -- Sidebar
     local Sidebar = Instance.new("Frame")
     Sidebar.Size = UDim2.new(0, 140, 1, 0)
     Sidebar.BackgroundColor3 = Theme.Sidebar
@@ -141,7 +143,6 @@ function Library:AddWindow(title, options)
     SidebarCornerFix.ZIndex = 0
     SidebarCornerFix.Parent = Sidebar
 
-    -- ✅ Título con más espacio arriba y abajo
     local TitleLabel = Instance.new("TextLabel")
     TitleLabel.Size = UDim2.new(1, -15, 0, 32)
     TitleLabel.Position = UDim2.new(0, 8, 0, 8)
@@ -155,7 +156,6 @@ function Library:AddWindow(title, options)
     TitleLabel.TextWrapped = true
     TitleLabel.Parent = Sidebar
 
-    -- TabContainer
     local TabContainer = Instance.new("ScrollingFrame")
     TabContainer.Size = UDim2.new(1, -10, 1, -55)
     TabContainer.Position = UDim2.new(0, 5, 0, 48)
@@ -177,7 +177,6 @@ function Library:AddWindow(title, options)
         TabContainer.CanvasSize = UDim2.new(0, 0, 0, TabListLayout.AbsoluteContentSize.Y + 15)
     end)
 
-    -- ContentContainer
     local ContentContainer = Instance.new("ScrollingFrame")
     ContentContainer.Size = UDim2.new(1, -155, 1, -60)
     ContentContainer.Position = UDim2.new(0, 150, 0, 50)
@@ -191,6 +190,7 @@ function Library:AddWindow(title, options)
     ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.Parent = MainFrame
 
+    -- ✅ CAMBIO 2: La X ahora minimiza en vez de cerrar
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 22, 0, 22)
     CloseBtn.Position = UDim2.new(1, -30, 0, 8)
@@ -202,8 +202,9 @@ function Library:AddWindow(title, options)
     CloseBtn.Parent = MainFrame
     CreateCorner(CloseBtn, 11)
 
+    -- ✅ Ahora MINIMIZA en vez de cerrar
     CloseBtn.MouseButton1Click:Connect(function()
-        ScreenGui:Destroy()
+        MainFrame.Visible = false
     end)
 
     local WindowObj = {}
