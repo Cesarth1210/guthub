@@ -94,6 +94,7 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
+    -- Botón flotante "MENÚ" con fondo oscuro y borde morado elegante
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 75, 0, 32)
@@ -107,14 +108,17 @@ function Library:AddWindow(title, options)
     ToggleBtn.Parent = ScreenGui
     
     CreateCorner(ToggleBtn, 6)
-    CreateStroke(ToggleBtn, Theme.Border, 1.5, 0)
+    local ToggleStroke = CreateStroke(ToggleBtn, Theme.Accent, 1.5, 0)
 
+    -- Animación interactiva para fondo y borde al pasar el cursor
     ToggleBtn.MouseEnter:Connect(function()
         TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementHover}):Play()
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Theme.AccentHover}):Play()
     end)
 
     ToggleBtn.MouseLeave:Connect(function()
         TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementBg}):Play()
+        TweenService:Create(ToggleStroke, TweenInfo.new(0.2), {Color = Theme.Accent}):Play()
     end)
 
     local MainFrame = Instance.new("Frame")
@@ -545,7 +549,7 @@ function Library:AddWindow(title, options)
             end)
 
             FolderLayout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
-                if isOpen then
+                if isOpen me
                     local contentHeight = FolderLayout.AbsoluteContentSize.Y + 10
                     FolderFrame.Size = UDim2.new(1, -5, 0, contentHeight + 40)
                 end
