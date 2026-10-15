@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v6)
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v8)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -27,7 +27,6 @@ local Theme = {
     Shadow = Color3.fromRGB(0, 0, 0)
 }
 
--- ⚠️ CAMBIA ESTO por la URL raw de tu imagen subida a GitHub
 local TOGGLE_IMAGE_URL = "rbxassetid://6035047409"
 
 local Library = {}
@@ -97,19 +96,28 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
-    -- ✅ CAMBIO 1: Botón con imagen en vez de "UI"
-    local ToggleBtn = Instance.new("ImageButton")
+    -- ✅ Botón flotante con imagen
+    local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 50, 0, 50)
-    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -25)
+    ToggleBtn.Size = UDim2.new(0, 55, 0, 55)
+    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -27)
     ToggleBtn.BackgroundColor3 = Theme.Accent
-    ToggleBtn.BackgroundTransparency = 0.2
-    ToggleBtn.Image = TOGGLE_IMAGE_URL
-    ToggleBtn.ImageColor3 = Color3.fromRGB(255, 255, 255)
-    ToggleBtn.ScaleType = Enum.ScaleType.Fit
+    ToggleBtn.BackgroundTransparency = 0.1
+    ToggleBtn.Text = ""
+    ToggleBtn.AutoButtonColor = false
     ToggleBtn.Parent = ScreenGui
-    CreateCorner(ToggleBtn, 25)
+    CreateCorner(ToggleBtn, 27)
     CreateStroke(ToggleBtn, Theme.Accent, 2, 0)
+
+    local ToggleIcon = Instance.new("ImageLabel")
+    ToggleIcon.Name = "Icon"
+    ToggleIcon.Size = UDim2.new(1, -6, 1, -6)
+    ToggleIcon.Position = UDim2.new(0, 3, 0, 3)
+    ToggleIcon.BackgroundTransparency = 1
+    ToggleIcon.Image = TOGGLE_IMAGE_URL
+    ToggleIcon.ScaleType = Enum.ScaleType.Crop
+    ToggleIcon.Parent = ToggleBtn
+    CreateCorner(ToggleIcon, 24)
 
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
@@ -124,8 +132,45 @@ function Library:AddWindow(title, options)
     CreateStroke(MainFrame, Theme.Border, 1.5, 0.3)
     MakeDraggable(MainFrame)
 
-    ToggleBtn.MouseButton1Click:Connect(function()
-        MainFrame.Visible = not MainFrame.Visible
+    -- ✅ Botón flotante arrastrable con detección click vs drag
+    local toggleDragging = false
+    local toggleDragStart = nil
+    local toggleStartPos = nil
+    local toggleMoved = false
+
+    ToggleBtn.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            toggleDragging = true
+            toggleMoved = false
+            toggleDragStart = input.Position
+            toggleStartPos = ToggleBtn.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    toggleDragging = false
+                    if not toggleMoved then
+                        MainFrame.Visible = not MainFrame.Visible
+                    end
+                end
+            end)
+        end
+    end)
+
+    ToggleBtn.InputChanged:Connect(function(input)
+        if toggleDragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            local delta = input.Position - toggleDragStart
+            if math.abs(delta.X) > 5 or math.abs(delta.Y) > 5 then
+                toggleMoved = true
+            end
+            if toggleMoved then
+                ToggleBtn.Position = UDim2.new(
+                    toggleStartPos.X.Scale,
+                    toggleStartPos.X.Offset + delta.X,
+                    toggleStartPos.Y.Scale,
+                    toggleStartPos.Y.Offset + delta.Y
+                )
+            end
+        end
     end)
 
     local Sidebar = Instance.new("Frame")
@@ -190,7 +235,6 @@ function Library:AddWindow(title, options)
     ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.Parent = MainFrame
 
-    -- ✅ CAMBIO 2: La X ahora minimiza en vez de cerrar
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 22, 0, 22)
     CloseBtn.Position = UDim2.new(1, -30, 0, 8)
@@ -202,7 +246,6 @@ function Library:AddWindow(title, options)
     CloseBtn.Parent = MainFrame
     CreateCorner(CloseBtn, 11)
 
-    -- ✅ Ahora MINIMIZA en vez de cerrar
     CloseBtn.MouseButton1Click:Connect(function()
         MainFrame.Visible = false
     end)
