@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v8.1)
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v8.4)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -28,7 +28,7 @@ local Theme = {
 }
 
 local TOGGLE_IMAGE_URL = "rbxassetid://6035047409"
-local CLOSE_IMAGE_URL = "rbxassetid://6035047379" -- Puedes cambiar este ID por el icono que quieras para cerrar
+local CLOSE_IMAGE_URL = "rbxassetid://6035047379" -- Imagen para reemplazar la X
 
 local Library = {}
 
@@ -97,7 +97,6 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
-    -- Botón flotante con imagen (Para reabrir)
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 55, 0, 55)
@@ -235,7 +234,7 @@ function Library:AddWindow(title, options)
     ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.Parent = MainFrame
 
-    -- ✅ Botón de cierre con Imagen en lugar de la "X" de texto
+    -- Botón de cierre con Imagen en lugar de la "X" de texto
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 26, 0, 26)
     CloseBtn.Position = UDim2.new(1, -34, 0, 8)
@@ -254,7 +253,6 @@ function Library:AddWindow(title, options)
     CloseIcon.ScaleType = Enum.ScaleType.Fit
     CloseIcon.Parent = CloseBtn
 
-    -- Efecto visual al pasar el mouse/tocar el botón de cerrar
     CloseBtn.MouseEnter:Connect(function()
         TweenService:Create(CloseBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(200, 50, 50)}):Play()
     end)
@@ -617,7 +615,7 @@ function Library:AddWindow(title, options)
             end
 
             function FolderTabData:AddDropdown(text, cb)
-                val s = snapshot()
+                local s = snapshot()
                 local f = TabData:AddDropdown(text, cb)
                 reparentNewElement(s)
                 return f
