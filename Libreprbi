@@ -1,13 +1,13 @@
-local ui_options = { 
-	main_color = Color3.fromRGB(150, 1, 1), 
-	min_size = Vector2.new(400, 300), 
-	toggle_key = Enum.KeyCode.C, 
-	can_resize = true, 
+local ui_options = { 	
+    main_color = Color3.fromRGB(150, 1, 1), 	
+    min_size = Vector2.new(400, 300), 	
+    toggle_key = Enum.KeyCode.C, 	
+    can_resize = true, 
 } 
 
-do 
-	local imgui = game:GetService("CoreGui"):FindFirstChild("imgui") 
-	if imgui then imgui:Destroy() end 
+do 	
+    local imgui = game:GetService("CoreGui"):FindFirstChild("imgui") 	
+    if imgui then imgui:Destroy() end 
 end 
 
 local imgui = Instance.new("ScreenGui") 
@@ -53,24 +53,6 @@ local Objects_2 = Instance.new("Frame")
 local UIListLayout_5 = Instance.new("UIListLayout") 
 local HorizontalAlignment = Instance.new("Frame") 
 local UIListLayout_6 = Instance.new("UIListLayout") 
-local Console = Instance.new("ImageLabel") 
-local ScrollingFrame = Instance.new("ScrollingFrame") 
-local Source = Instance.new("TextBox") 
-local Comments = Instance.new("TextLabel") 
-local Globals = Instance.new("TextLabel") 
-local Keywords = Instance.new("TextLabel") 
-local RemoteHighlight = Instance.new("TextLabel") 
-local Strings = Instance.new("TextLabel") 
-local Tokens = Instance.new("TextLabel") 
-local Numbers = Instance.new("TextLabel") 
-local Info = Instance.new("TextLabel") 
-local Lines = Instance.new("TextLabel") 
-local ColorPicker = Instance.new("ImageLabel") 
-local Palette = Instance.new("ImageLabel") 
-local Indicator_3 = Instance.new("ImageLabel") 
-local Sample = Instance.new("ImageLabel") 
-local Saturation = Instance.new("ImageLabel") 
-local Indicator_4 = Instance.new("Frame") 
 local Switch = Instance.new("TextButton") 
 local TextButton_Roundify_4px_4 = Instance.new("ImageLabel") 
 local Title_3 = Instance.new("TextLabel") 
@@ -96,7 +78,7 @@ Label.Parent = Prefabs
 Label.BackgroundColor3 = Color3.new(1, 1, 1) 
 Label.BackgroundTransparency = 1 
 Label.Size = UDim2.new(0, 200, 0, 20) 
-Label.Font = Enum.Font.SourceSansBold
+Label.Font = Enum.Font.SourceSansBold 
 Label.Text = "Hello, world 123" 
 Label.TextColor3 = Color3.new(1, 1, 1) 
 Label.TextSize = 17 
@@ -140,7 +122,7 @@ Toggle.Position = UDim2.new(0, 5, 0, -2)
 Toggle.Rotation = 90 
 Toggle.Size = UDim2.new(0, 20, 0, 20) 
 Toggle.ZIndex = 2 
-Toggle.Image = "rbxassetid://6031094678" -- CORREGIDO (Sin URL web)
+Toggle.Image = "rbxassetid://6031094678"
 
 Base.Name = "Base" 
 Base.Parent = Bar 
@@ -224,6 +206,7 @@ UIListLayout_2.Parent = Tab
 UIListLayout_2.SortOrder = Enum.SortOrder.LayoutOrder 
 UIListLayout_2.Padding = UDim.new(0, 5) 
 
+TextBox.Name = "TextBox" 
 TextBox.Parent = Prefabs 
 TextBox.BackgroundColor3 = Color3.new(1, 1, 1) 
 TextBox.BackgroundTransparency = 1 
@@ -265,11 +248,11 @@ Indicator_2.Name = "Indicator"
 Indicator_2.Parent = Dropdown 
 Indicator_2.BackgroundColor3 = Color3.new(1, 1, 1) 
 Indicator_2.BackgroundTransparency = 1 
-Indicator_2.Position = UDim2.new(0.899999976, -10, 0.1, 0) 
+Indicator_2.Position = UDim2.new(0.9, -10, 0.1, 0) 
 Indicator_2.Rotation = -90 
 Indicator_2.Size = UDim2.new(0, 15, 0, 15) 
 Indicator_2.ZIndex = 2 
-Indicator_2.Image = "rbxassetid://6031094678" -- CORREGIDO (Sin URL web)
+Indicator_2.Image = "rbxassetid://6031094678"
 
 Box.Name = "Box" 
 Box.Parent = Dropdown 
@@ -296,22 +279,11 @@ Objects.ScrollBarThickness = 8
 UIListLayout_4.Parent = Objects 
 UIListLayout_4.SortOrder = Enum.SortOrder.LayoutOrder 
 
-TextButton_Roundify_4px.Name = "TextButton_Roundify_4px" 
-TextButton_Roundify_4px.Parent = Dropdown 
-TextButton_Roundify_4px.BackgroundColor3 = Color3.new(1, 1, 1) 
-TextButton_Roundify_4px.BackgroundTransparency = 1 
-TextButton_Roundify_4px.Size = UDim2.new(1, 0, 1, 0) 
-TextButton_Roundify_4px.Image = "rbxassetid://2851929490" 
-TextButton_Roundify_4px.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608) 
-TextButton_Roundify_4px.ScaleType = Enum.ScaleType.Slice 
-TextButton_Roundify_4px.SliceCenter = Rect.new(4, 4, 4, 4) 
-
 TabButton.Name = "TabButton" 
 TabButton.Parent = Prefabs 
 TabButton.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431) 
 TabButton.BackgroundTransparency = 1 
 TabButton.BorderSizePixel = 0 
-TabButton.Position = UDim2.new(0.185185179, 0, 0, 0) 
 TabButton.Size = UDim2.new(0, 71, 0, 20) 
 TabButton.ZIndex = 2 
 TabButton.Font = Enum.Font.SourceSansBold 
@@ -328,6 +300,60 @@ TextButton_Roundify_4px_2.Image = "rbxassetid://2851929490"
 TextButton_Roundify_4px_2.ImageColor3 = Color3.new(0.203922, 0.207843, 0.219608) 
 TextButton_Roundify_4px_2.ScaleType = Enum.ScaleType.Slice 
 TextButton_Roundify_4px_2.SliceCenter = Rect.new(4, 4, 4, 4) 
+
+Folder.Name = "Folder" 
+Folder.Parent = Prefabs 
+Folder.BackgroundColor3 = Color3.new(1, 1, 1) 
+Folder.BackgroundTransparency = 1 
+Folder.Position = UDim2.new(0, 0, 0, 50) 
+Folder.Size = UDim2.new(1, 0, 0, 20) 
+Folder.Image = "rbxassetid://2851929490" 
+Folder.ImageColor3 = Color3.new(0.0823529, 0.0862745, 0.0901961) 
+Folder.ScaleType = Enum.ScaleType.Slice 
+Folder.SliceCenter = Rect.new(4, 4, 4, 4) 
+
+Button.Name = "Button" 
+Button.Parent = Folder 
+Button.BackgroundColor3 = Color3.new(0.160784, 0.290196, 0.478431) 
+Button.BackgroundTransparency = 1 
+Button.BorderSizePixel = 0 
+Button.Size = UDim2.new(1, 0, 0, 20) 
+Button.ZIndex = 2 
+Button.Font = Enum.Font.SourceSansBold 
+Button.Text = " Folder" 
+Button.TextColor3 = Color3.new(1, 1, 1) 
+Button.TextSize = 17 
+Button.TextXAlignment = Enum.TextXAlignment.Left 
+
+TextButton_Roundify_4px_3.Name = "TextButton_Roundify_4px" 
+TextButton_Roundify_4px_3.Parent = Button 
+TextButton_Roundify_4px_3.BackgroundColor3 = Color3.new(1, 1, 1) 
+TextButton_Roundify_4px_3.BackgroundTransparency = 1 
+TextButton_Roundify_4px_3.Size = UDim2.new(1, 0, 1, 0) 
+TextButton_Roundify_4px_3.Image = "rbxassetid://2851929490" 
+TextButton_Roundify_4px_3.ImageColor3 = Color3.new(0.160784, 0.290196, 0.478431) 
+TextButton_Roundify_4px_3.ScaleType = Enum.ScaleType.Slice 
+TextButton_Roundify_4px_3.SliceCenter = Rect.new(4, 4, 4, 4) 
+
+Toggle_2.Name = "Toggle" 
+Toggle_2.Parent = Button 
+Toggle_2.BackgroundColor3 = Color3.new(1, 1, 1) 
+Toggle_2.BackgroundTransparency = 1 
+Toggle_2.Position = UDim2.new(0, 5, 0, 0) 
+Toggle_2.Size = UDim2.new(0, 20, 0, 20) 
+Toggle_2.Image = "rbxassetid://6031094678"
+
+Objects_2.Name = "Objects" 
+Objects_2.Parent = Folder 
+Objects_2.BackgroundColor3 = Color3.new(1, 1, 1) 
+Objects_2.BackgroundTransparency = 1 
+Objects_2.Position = UDim2.new(0, 10, 0, 25) 
+Objects_2.Size = UDim2.new(1, -10, 1, -25) 
+Objects_2.Visible = false 
+
+UIListLayout_5.Parent = Objects_2 
+UIListLayout_5.SortOrder = Enum.SortOrder.LayoutOrder 
+UIListLayout_5.Padding = UDim.new(0, 5) 
 
 Button_2.Name = "Button" 
 Button_2.Parent = Prefabs 
@@ -386,6 +412,18 @@ Title_3.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314)
 Title_3.TextSize = 17 
 Title_3.TextXAlignment = Enum.TextXAlignment.Left 
 
+DropdownButton.Name = "DropdownButton" 
+DropdownButton.Parent = Prefabs 
+DropdownButton.BackgroundColor3 = Color3.new(0.129412, 0.133333, 0.141176) 
+DropdownButton.BorderSizePixel = 0 
+DropdownButton.Size = UDim2.new(1, 0, 0, 20) 
+DropdownButton.ZIndex = 3 
+DropdownButton.Font = Enum.Font.SourceSans 
+DropdownButton.Text = " Button" 
+DropdownButton.TextColor3 = Color3.new(0.784314, 0.784314, 0.784314) 
+DropdownButton.TextSize = 18 
+DropdownButton.TextXAlignment = Enum.TextXAlignment.Left 
+
 Windows.Name = "Windows" 
 Windows.Parent = imgui 
 Windows.BackgroundColor3 = Color3.new(1, 1, 1) 
@@ -393,13 +431,16 @@ Windows.BackgroundTransparency = 1
 Windows.Position = UDim2.new(0, 20, 0, 20) 
 Windows.Size = UDim2.new(1, 20, 1, -20) 
 
-local UIS = game:GetService("UserInputService") 
 local TweenService = game:GetService("TweenService") 
 local RS = game:GetService("RunService") 
-local ps = game:GetService("Players") 
-local p = ps.LocalPlayer 
-
 local library = {} 
+
+local function Resize(part, new, _delay) 
+	_delay = _delay or 0.5 
+	local tweenInfo = TweenInfo.new(_delay, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) 
+	local tween = TweenService:Create(part, tweenInfo, new) 
+	tween:Play() 
+end 
 
 function library:AddWindow(title, options) 
 	title = tostring(title or "New Window") 
@@ -418,7 +459,6 @@ function library:AddWindow(title, options)
 	Bar:FindFirstChild("Top").ImageColor3 = options.main_color 
 
 	Window.Draggable = true 
-
 	local window_data = {} 
 
 	function window_data:AddTab(tab_name) 
@@ -497,8 +537,92 @@ function library:AddWindow(title, options)
 
 			return switch_data, switch 		end 
 
+		function tab_data:AddTextBox(textbox_text, callback) 
+			callback = typeof(callback) == "function" and callback or function() end 
+			local textbox = Prefabs:FindFirstChild("TextBox"):Clone() 
+			textbox.Parent = new_tab 
+			textbox.PlaceholderText = tostring(textbox_text or "Input Text") 
+
+			textbox.FocusLost:Connect(function(enterPressed) 
+				if enterPressed then 
+					pcall(callback, textbox.Text) 
+				end 
+			end) 
+			return textbox 
+		end 
+
+		function tab_data:AddDropdown(dropdown_name, callback) 
+			local dropdown_data = {} 
+			callback = typeof(callback) == "function" and callback or function() end 
+			local dropdown = Prefabs:FindFirstChild("Dropdown"):Clone() 
+			local box = dropdown:FindFirstChild("Box") 
+			local objects = box:FindFirstChild("Objects") 
+			local indicator = dropdown:FindFirstChild("Indicator") 
+			dropdown.Parent = new_tab 
+			dropdown.Text = " " .. tostring(dropdown_name or "Dropdown") 
+			box.Size = UDim2.new(1, 0, 0, 0) 
+
+			local open = false 
+			dropdown.MouseButton1Click:Connect(function() 
+				open = not open 
+				local len = (#objects:GetChildren() - 1) * 20 
+				if open then 
+					Resize(box, {Size = UDim2.new(1, 0, 0, math.min(len, 150))}, options.tween_time) 
+					Resize(indicator, {Rotation = 90}, options.tween_time) 
+				else 
+					Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time) 
+					Resize(indicator, {Rotation = -90}, options.tween_time) 
+				end 
+			end) 
+
+			function dropdown_data:Add(n) 
+				n = tostring(n or "Option") 
+				local object = Prefabs:FindFirstChild("DropdownButton"):Clone() 
+				object.Parent = objects 
+				object.Text = " " .. n 
+
+				object.MouseButton1Click:Connect(function() 
+					dropdown.Text = " [ " .. n .. " ]" 
+					open = false 
+					Resize(box, {Size = UDim2.new(1, 0, 0, 0)}, options.tween_time) 
+					Resize(indicator, {Rotation = -90}, options.tween_time) 
+					pcall(callback, n) 
+				end) 
+			end 
+
+			return dropdown_data, dropdown 
+		end 
+
+		function tab_data:AddFolder(folder_name) 
+			local folder_data = {} 
+			local folder = Prefabs:FindFirstChild("Folder"):Clone() 
+			local button = folder:FindFirstChild("Button") 
+			local objects = folder:FindFirstChild("Objects") 
+			local toggle = button:FindFirstChild("Toggle") 
+			folder.Parent = new_tab 
+			button.Text = " " .. tostring(folder_name or "Folder") 
+
+			local open = false 
+			button.MouseButton1Click:Connect(function() 
+				open = not open 
+				Resize(toggle, {Rotation = open and 90 or 0}, options.tween_time) 
+				objects.Visible = open 
+			end) 
+
+			for k, v in pairs(tab_data) do 
+				folder_data[k] = function(...) 
+					local res = {v(...)} 
+					if res[2] then res[2].Parent = objects end 
+					return unpack(res) 
+				end 
+			end 
+
+			return folder_data, folder 
+		end 
+
 		return tab_data, new_tab 	end 
 
-	return window_data, Window end 
+	return window_data, Window 
+end 
 
 return library
