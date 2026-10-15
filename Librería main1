@@ -27,9 +27,6 @@ local Theme = {
     Shadow = Color3.fromRGB(0, 0, 0)
 }
 
--- Tu ID personalizado de Roblox aplicado correctamente
-local TOGGLE_IMAGE_URL = "rbxassetid://75707318300161"
-
 local Library = {}
 
 local function CreateCorner(parent, radius)
@@ -52,7 +49,7 @@ local function MakeDraggable(frame, dragArea)
     local dragging, dragInput, dragStart, startPos
     local area = dragArea or frame
     local dragConn
-
+    
     area.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
@@ -67,13 +64,13 @@ local function MakeDraggable(frame, dragArea)
             end)
         end
     end)
-
+    
     area.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
-
+    
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
             local delta = input.Position - dragStart
@@ -87,7 +84,7 @@ function Library:AddWindow(title, options)
     ScreenGui.Name = "DeepUI_Script"
     ScreenGui.ResetOnSpawn = false
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-
+    
     if syn and syn.protect_gui then
         syn.protect_gui(ScreenGui)
         ScreenGui.Parent = CoreGui
@@ -97,28 +94,29 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
-    -- Botón flotante medianamente pequeño con tu imagen integrada
+    -- Botón flotante "MENÚ" con diseño integrado y colores combinados
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
-    ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
-    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -22)
-    ToggleBtn.BackgroundColor3 = Theme.Accent
-    ToggleBtn.BackgroundTransparency = 0.1
-    ToggleBtn.Text = ""
+    ToggleBtn.Size = UDim2.new(0, 75, 0, 32)
+    ToggleBtn.Position = UDim2.new(0, 15, 0.5, -16)
+    ToggleBtn.BackgroundColor3 = Theme.ElementBg
     ToggleBtn.AutoButtonColor = false
+    ToggleBtn.Text = "MENÚ"
+    ToggleBtn.TextColor3 = Theme.Text
+    ToggleBtn.TextSize = 11
+    ToggleBtn.Font = Enum.Font.GothamBold
     ToggleBtn.Parent = ScreenGui
-    CreateCorner(ToggleBtn, 22)
-    CreateStroke(ToggleBtn, Theme.Accent, 2, 0)
+    
+    CreateCorner(ToggleBtn, 6)
+    CreateStroke(ToggleBtn, Theme.Border, 1.5, 0)
 
-    local ToggleIcon = Instance.new("ImageLabel")
-    ToggleIcon.Name = "Icon"
-    ToggleIcon.Size = UDim2.new(1, -4, 1, -4)
-    ToggleIcon.Position = UDim2.new(0, 2, 0, 2)
-    ToggleIcon.BackgroundTransparency = 1
-    ToggleIcon.Image = TOGGLE_IMAGE_URL
-    ToggleIcon.ScaleType = Enum.ScaleType.Crop
-    ToggleIcon.Parent = ToggleBtn
-    CreateCorner(ToggleIcon, 20)
+    ToggleBtn.MouseEnter:Connect(function()
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementHover}):Play()
+    end)
+
+    ToggleBtn.MouseLeave:Connect(function()
+        TweenService:Create(ToggleBtn, TweenInfo.new(0.2), {BackgroundColor3 = Theme.ElementBg}):Play()
+    end)
 
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
@@ -129,6 +127,7 @@ function Library:AddWindow(title, options)
     MainFrame.BorderSizePixel = 0
     MainFrame.Visible = true
     MainFrame.Parent = ScreenGui
+    
     CreateCorner(MainFrame, 12)
     CreateStroke(MainFrame, Theme.Border, 1.5, 0.3)
     MakeDraggable(MainFrame)
@@ -144,7 +143,7 @@ function Library:AddWindow(title, options)
             toggleMoved = false
             toggleDragStart = input.Position
             toggleStartPos = ToggleBtn.Position
-
+            
             input.Changed:Connect(function()
                 if input.UserInputState == Enum.UserInputState.End then
                     toggleDragging = false
@@ -164,9 +163,9 @@ function Library:AddWindow(title, options)
             end
             if toggleMoved then
                 ToggleBtn.Position = UDim2.new(
-                    toggleStartPos.X.Scale,
-                    toggleStartPos.X.Offset + delta.X,
-                    toggleStartPos.Y.Scale,
+                    toggleStartPos.X.Scale, 
+                    toggleStartPos.X.Offset + delta.X, 
+                    toggleStartPos.Y.Scale, 
                     toggleStartPos.Y.Offset + delta.Y
                 )
             end
@@ -235,7 +234,6 @@ function Library:AddWindow(title, options)
     ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.Parent = MainFrame
 
-    -- Botón de cierre con la "X" clásica
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 22, 0, 22)
     CloseBtn.Position = UDim2.new(1, -30, 0, 8)
@@ -258,7 +256,7 @@ function Library:AddWindow(title, options)
         local TabButton = Instance.new("TextButton")
         TabButton.Size = UDim2.new(1, -5, 0, 28)
         TabButton.BackgroundColor3 = Theme.ElementBg
-        TabButton.Text = "  " .. tabName
+        TabButton.Text = " " .. tabName
         TabButton.TextColor3 = Theme.SubText
         TabButton.TextSize = 11
         TabButton.Font = Enum.Font.GothamMedium
@@ -299,7 +297,9 @@ function Library:AddWindow(title, options)
         end
 
         TabButton.MouseButton1Click:Connect(SelectTab)
-        if not CurrentTab then SelectTab() end
+        if not CurrentTab then
+            SelectTab()
+        end
 
         local TabData = {}
 
@@ -369,7 +369,6 @@ function Library:AddWindow(title, options)
             CreateCorner(SwitchCircle, 9)
 
             local Toggled = false
-
             local function UpdateState()
                 if Toggled then
                     SwitchBg.BackgroundColor3 = Theme.Accent
@@ -400,7 +399,6 @@ function Library:AddWindow(title, options)
                 UpdateState()
                 if callback then pcall(callback, Toggled) end
             end
-
             return switchObj
         end
 
@@ -445,7 +443,7 @@ function Library:AddWindow(title, options)
             local DropdownBtn = Instance.new("TextButton")
             DropdownBtn.Size = UDim2.new(1, 0, 0, 32)
             DropdownBtn.BackgroundTransparency = 1
-            DropdownBtn.Text = "  " .. dropdownName
+            DropdownBtn.Text = " " .. dropdownName
             DropdownBtn.TextColor3 = Theme.Text
             DropdownBtn.TextSize = 12
             DropdownBtn.Font = Enum.Font.GothamMedium
@@ -480,7 +478,7 @@ function Library:AddWindow(title, options)
                 local ItemBtn = Instance.new("TextButton")
                 ItemBtn.Size = UDim2.new(1, 0, 0, 28)
                 ItemBtn.BackgroundColor3 = Theme.ElementBg
-                ItemBtn.Text = "  " .. itemText
+                ItemBtn.Text = " " .. itemText
                 ItemBtn.TextColor3 = Theme.SubText
                 ItemBtn.TextSize = 11
                 ItemBtn.Font = Enum.Font.Gotham
@@ -489,7 +487,7 @@ function Library:AddWindow(title, options)
 
                 ItemBtn.MouseButton1Click:Connect(function()
                     isOpen = false
-                    DropdownBtn.Text = "  " .. dropdownName .. ": " .. itemText
+                    DropdownBtn.Text = " " .. dropdownName .. ": " .. itemText
                     TweenService:Create(DropdownFrame, TweenInfo.new(0.2), {Size = UDim2.new(1, -5, 0, 32)}):Play()
                     TweenService:Create(ListHolder, TweenInfo.new(0.2), {Size = UDim2.new(1, 0, 0, 0)}):Play()
                     if callback then pcall(callback, itemText) end
@@ -520,7 +518,7 @@ function Library:AddWindow(title, options)
             local FolderBtn = Instance.new("TextButton")
             FolderBtn.Size = UDim2.new(1, 0, 0, 32)
             FolderBtn.BackgroundTransparency = 1
-            FolderBtn.Text = "  📁 " .. folderName
+            FolderBtn.Text = " 📁 " .. folderName
             FolderBtn.TextColor3 = Theme.Text
             FolderBtn.TextSize = 12
             FolderBtn.Font = Enum.Font.GothamBold
@@ -568,7 +566,9 @@ function Library:AddWindow(title, options)
 
             local function snapshot()
                 local s = {}
-                for _, c in ipairs(TabContentFrame:GetChildren()) do s[c] = true end
+                for _, c in ipairs(TabContentFrame:GetChildren()) do
+                    s[c] = true
+                end
                 return s
             end
 
@@ -583,7 +583,10 @@ function Library:AddWindow(title, options)
                 btn.Parent = ContentHolder
                 CreateCorner(btn, 6)
                 CreateStroke(btn, Theme.Border, 1, 0.5)
-                btn.MouseButton1Click:Connect(function() if cb then pcall(cb) end end)
+
+                btn.MouseButton1Click:Connect(function()
+                    if cb then pcall(cb) end
+                end)
                 return btn
             end
 
@@ -609,10 +612,10 @@ function Library:AddWindow(title, options)
             end
 
             function FolderTabData:AddLabel(text)
-                local s = snapshot()
+                (`local s = snapshot()
                 local f = TabData:AddLabel(text)
                 reparentNewElement(s)
-                return f
+                return f`) -- (Corregido el formato)
             end
 
             return FolderTabData
