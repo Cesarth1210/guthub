@@ -28,7 +28,7 @@ local Theme = {
 }
 
 -- ⚠️ CAMBIA ESTO por la URL raw de tu imagen subida a GitHub
-local TOGGLE_IMAGE_URL = "https://raw.githubusercontent.com/Cesarth1210/guthub/refs/heads/main/Icon.jpg"
+local TOGGLE_IMAGE_URL = "rbxassetid://6035047409"
 
 local Library = {}
 
