@@ -1,5 +1,5 @@
 -- ==========================================
--- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v8.5)
+-- LIBRERÍA NUEVA INTEGRADA & ADAPTADA (v8.6 Final)
 -- ==========================================
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
@@ -27,8 +27,8 @@ local Theme = {
     Shadow = Color3.fromRGB(0, 0, 0)
 }
 
--- Reemplaza este ID por el de tu nueva imagen subida a Roblox cuando la tengas
-local TOGGLE_IMAGE_URL = "rbxassetid://6035047409" 
+-- Tu ID personalizado de Roblox aplicado correctamente
+local TOGGLE_IMAGE_URL = "rbxassetid://75707318300161"
 
 local Library = {}
 
@@ -97,7 +97,7 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
-    -- Botón flotante medianamente pequeño (Tamaño 45x45 para que se vea estético y cómodo)
+    -- Botón flotante medianamente pequeño con tu imagen integrada
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 45, 0, 45)
@@ -235,7 +235,7 @@ function Library:AddWindow(title, options)
     ContentContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
     ContentContainer.Parent = MainFrame
 
-    -- Botón de cierre con la "X" clásica limpia
+    -- Botón de cierre con la "X" clásica
     local CloseBtn = Instance.new("TextButton")
     CloseBtn.Size = UDim2.new(0, 22, 0, 22)
     CloseBtn.Position = UDim2.new(1, -30, 0, 8)
