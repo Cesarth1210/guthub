@@ -94,7 +94,6 @@ function Library:AddWindow(title, options)
         ScreenGui.Parent = CoreGui
     end
 
-    -- Botón flotante "MENÚ" con diseño integrado y colores combinados
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Size = UDim2.new(0, 75, 0, 32)
@@ -612,10 +611,10 @@ function Library:AddWindow(title, options)
             end
 
             function FolderTabData:AddLabel(text)
-                (`local s = snapshot()
+                local s = snapshot()
                 local f = TabData:AddLabel(text)
                 reparentNewElement(s)
-                return f`) -- (Corregido el formato)
+                return f
             end
 
             return FolderTabData
