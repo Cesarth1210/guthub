@@ -521,7 +521,7 @@ function Library:AddWindow(title, options)
             local FolderBtn = Instance.new("TextButton")
             FolderBtn.Size = UDim2.new(1, 0, 0, 32)
             FolderBtn.BackgroundTransparency = 1
-            FolderBtn.Text = " 📁 " .. folderName
+            FolderBtn.Text = " 🔥 " .. folderName
             FolderBtn.TextColor3 = Theme.Text
             FolderBtn.TextSize = 12
             FolderBtn.Font = Enum.Font.GothamBold
