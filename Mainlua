@@ -1,7 +1,7 @@
 local Library = {}
 Library.Unloaded = false
 
--- Eliminar ejecuciones anteriores si existen
+-- Eliminar ejecuciones anteriores
 do
     local coreGui = (gethui and gethui()) or game:GetService("CoreGui")
     if coreGui:FindFirstChild("SoloLevelingUI") then
@@ -15,22 +15,23 @@ ScreenGui.Name = "SoloLevelingUI"
 ScreenGui.Parent = (gethui and gethui()) or game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
 ScreenGui.IgnoreGuiInset = true
+ScreenGui.DisplayOrder = 999999
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
 
--- Estructura de Ventana
 function Library:AddWindow(title, options)
     options = options or {}
     local windowTitle = title or "System Interface"
     local mainColor = options.main_color or Color3.fromRGB(255, 215, 0)
     
-    -- Forzamos un tamaño máximo para que no se salga de la pantalla
-    local minSize = options.min_size or Vector2.new(480, 350)
-    if minSize.Y > 600 then minSize = Vector2.new(minSize.X, 600) end
+    -- Ajuste automático de tamaño para que quepa en cualquier pantalla
+    local viewport = workspace.CurrentCamera.ViewportSize
+    local winWidth = math.clamp(options.min_size and options.min_size.X or 450, 300, viewport.X - 40)
+    local winHeight = math.clamp(options.min_size and options.min_size.Y or 350, 250, viewport.Y - 120)
 
-    -- Contenedor Ventana Principal
+    -- Ventana Principal
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
@@ -38,11 +39,10 @@ function Library:AddWindow(title, options)
     MainFrame.BorderSizePixel = 0
     MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
     MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-    MainFrame.Size = UDim2.new(0, minSize.X, 0, minSize.Y)
+    MainFrame.Size = UDim2.new(0, winWidth, 0, winHeight)
     MainFrame.ClipsDescendants = true
     MainFrame.Active = true
 
-    -- Esquinas Redondeadas y Borde
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
@@ -50,7 +50,6 @@ function Library:AddWindow(title, options)
     local UIStroke = Instance.new("UIStroke")
     UIStroke.Color = mainColor
     UIStroke.Thickness = 1.5
-    UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     UIStroke.Parent = MainFrame
 
     -- Barra Superior (Title Bar)
@@ -59,7 +58,6 @@ function Library:AddWindow(title, options)
     TitleBar.Parent = MainFrame
     TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
     TitleBar.BorderSizePixel = 0
-    TitleBar.Position = UDim2.new(0, 0, 0, 0)
     TitleBar.Size = UDim2.new(1, 0, 0, 35)
 
     local TitleBarCorner = Instance.new("UICorner")
@@ -67,7 +65,6 @@ function Library:AddWindow(title, options)
     TitleBarCorner.Parent = TitleBar
 
     local TitleText = Instance.new("TextLabel")
-    TitleText.Name = "Title"
     TitleText.Parent = TitleBar
     TitleText.BackgroundTransparency = 1
     TitleText.Position = UDim2.new(0, 12, 0, 0)
@@ -80,7 +77,6 @@ function Library:AddWindow(title, options)
 
     -- Botón de Minimizar
     local ToggleBtn = Instance.new("TextButton")
-    ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Parent = TitleBar
     ToggleBtn.BackgroundTransparency = 1
     ToggleBtn.Position = UDim2.new(1, -35, 0, 0)
@@ -92,7 +88,6 @@ function Library:AddWindow(title, options)
 
     -- Contenedor de Pestañas
     local TabBar = Instance.new("ScrollingFrame")
-    TabBar.Name = "TabBar"
     TabBar.Parent = MainFrame
     TabBar.BackgroundTransparency = 1
     TabBar.Position = UDim2.new(0, 10, 0, 42)
@@ -111,37 +106,28 @@ function Library:AddWindow(title, options)
         TabBar.CanvasSize = UDim2.new(0, TabList.AbsoluteContentSize.X + 10, 0, 0)
     end)
 
-    -- Contenedor de Páginas (Arreglado para que no se salga)
+    -- Contenedor de Páginas
     local TabContainer = Instance.new("Frame")
-    TabContainer.Name = "TabContainer"
     TabContainer.Parent = MainFrame
     TabContainer.BackgroundTransparency = 1
     TabContainer.Position = UDim2.new(0, 10, 0, 80)
-    TabContainer.Size = UDim2.new(1, -20, 1, -90) -- Ajustado para que quede bien
+    TabContainer.Size = UDim2.new(1, -20, 1, -90)
 
     -- Sistema de Arrastre
-    local dragging, dragInput, dragStart, startPos
+    local dragging, dragStart, startPos
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
             input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
+                if input.UserInputState == Enum.UserInputState.End then dragging = false end
             end)
         end
     end)
 
-    TitleBar.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-
     UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
+        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
             local delta = input.Position - dragStart
             MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
         end
@@ -152,12 +138,12 @@ function Library:AddWindow(title, options)
     ToggleBtn.MouseButton1Click:Connect(function()
         collapsed = not collapsed
         if collapsed then
-            MainFrame:TweenSize(UDim2.new(0, minSize.X, 0, 35), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+            MainFrame:TweenSize(UDim2.new(0, winWidth, 0, 35), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
             ToggleBtn.Text = "+"
             TabBar.Visible = false
             TabContainer.Visible = false
         else
-            MainFrame:TweenSize(UDim2.new(0, minSize.X, 0, minSize.Y), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+            MainFrame:TweenSize(UDim2.new(0, winWidth, 0, winHeight), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
             ToggleBtn.Text = "-"
             TabBar.Visible = true
             TabContainer.Visible = true
@@ -165,11 +151,10 @@ function Library:AddWindow(title, options)
     end)
 
     local WindowMethods = {}
-    local FirstTab = true -- Variable para controlar la primera pestaña
+    local FirstTab = true
 
     function WindowMethods:AddTab(tabName)
         local TabBtn = Instance.new("TextButton")
-        TabBtn.Name = tabName .. "_TabBtn"
         TabBtn.Parent = TabBar
         TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
         TabBtn.BorderSizePixel = 0
@@ -184,7 +169,6 @@ function Library:AddWindow(title, options)
         TabCorner.Parent = TabBtn
 
         local PageScroller = Instance.new("ScrollingFrame")
-        PageScroller.Name = tabName .. "_Page"
         PageScroller.Parent = TabContainer
         PageScroller.BackgroundTransparency = 1
         PageScroller.Size = UDim2.new(1, 0, 1, 0)
@@ -202,7 +186,6 @@ function Library:AddWindow(title, options)
             PageScroller.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 10)
         end)
 
-        -- Alternar pestañas (Click)
         TabBtn.MouseButton1Click:Connect(function()
             for _, child in pairs(TabContainer:GetChildren()) do
                 if child:IsA("ScrollingFrame") then child.Visible = false end
@@ -218,7 +201,7 @@ function Library:AddWindow(title, options)
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end)
 
-        -- Arreglo: Activar la primera pestaña automáticamente sin importar cuántas haya
+        -- Hace visible la primera pestaña por defecto
         if FirstTab then
             FirstTab = false
             PageScroller.Visible = true
@@ -228,11 +211,9 @@ function Library:AddWindow(title, options)
 
         local TabElements = {}
 
-        -- Botón interactivo
         function TabElements:AddButton(btnText, callback)
             callback = callback or function() end
             local Btn = Instance.new("TextButton")
-            Btn.Name = btnText
             Btn.Parent = PageScroller
             Btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
             Btn.BorderSizePixel = 0
@@ -261,7 +242,6 @@ function Library:AddWindow(title, options)
             return Btn
         end
 
-        -- Interruptor (Toggle)
         function TabElements:AddToggle(toggleText, callback)
             callback = callback or function() end
             local toggled = false
