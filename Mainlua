@@ -14,6 +14,8 @@ local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Name = "SoloLevelingUI"
 ScreenGui.Parent = (gethui and gethui()) or game:GetService("CoreGui")
 ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true
+ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
@@ -22,10 +24,13 @@ local TweenService = game:GetService("TweenService")
 function Library:AddWindow(title, options)
     options = options or {}
     local windowTitle = title or "System Interface"
-    local mainColor = options.main_color or Color3.fromRGB(255, 215, 0) -- Dorado / Amarillo
-    local minSize = options.min_size or Vector2.new(450, 320)
+    local mainColor = options.main_color or Color3.fromRGB(255, 215, 0)
+    
+    -- Forzamos un tamaño máximo para que no se salga de la pantalla
+    local minSize = options.min_size or Vector2.new(480, 350)
+    if minSize.Y > 600 then minSize = Vector2.new(minSize.X, 600) end
 
-    -- Contenedor Ventana Principal (Fijo y centrado correctamente)
+    -- Contenedor Ventana Principal
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
@@ -37,7 +42,7 @@ function Library:AddWindow(title, options)
     MainFrame.ClipsDescendants = true
     MainFrame.Active = true
 
-    -- Esquinas Redondeadas y Borde Neon
+    -- Esquinas Redondeadas y Borde
     local UICorner = Instance.new("UICorner")
     UICorner.CornerRadius = UDim.new(0, 8)
     UICorner.Parent = MainFrame
@@ -48,7 +53,7 @@ function Library:AddWindow(title, options)
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     UIStroke.Parent = MainFrame
 
-    -- Barra Superior (Title Bar) - Posicionada exactamente arriba
+    -- Barra Superior (Title Bar)
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
     TitleBar.Parent = MainFrame
@@ -73,7 +78,7 @@ function Library:AddWindow(title, options)
     TitleText.TextSize = 14
     TitleText.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Botón de Minimizar / Contraer
+    -- Botón de Minimizar
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Name = "ToggleBtn"
     ToggleBtn.Parent = TitleBar
@@ -85,7 +90,7 @@ function Library:AddWindow(title, options)
     ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     ToggleBtn.TextSize = 18
 
-    -- Contenedor de Pestañas (Tabs) - Justo debajo de la barra superior
+    -- Contenedor de Pestañas
     local TabBar = Instance.new("ScrollingFrame")
     TabBar.Name = "TabBar"
     TabBar.Parent = MainFrame
@@ -106,15 +111,15 @@ function Library:AddWindow(title, options)
         TabBar.CanvasSize = UDim2.new(0, TabList.AbsoluteContentSize.X + 10, 0, 0)
     end)
 
-    -- Contenedor de las páginas de contenido
+    -- Contenedor de Páginas (Arreglado para que no se salga)
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = "TabContainer"
     TabContainer.Parent = MainFrame
     TabContainer.BackgroundTransparency = 1
     TabContainer.Position = UDim2.new(0, 10, 0, 80)
-    TabContainer.Size = UDim2.new(1, -20, 1, -85)
+    TabContainer.Size = UDim2.new(1, -20, 1, -90) -- Ajustado para que quede bien
 
-    -- Sistema de Arrastre táctil y ratón (Draggable)
+    -- Sistema de Arrastre
     local dragging, dragInput, dragStart, startPos
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -142,7 +147,7 @@ function Library:AddWindow(title, options)
         end
     end)
 
-    -- Minimizar / Maximizar ventana
+    -- Minimizar
     local collapsed = false
     ToggleBtn.MouseButton1Click:Connect(function()
         collapsed = not collapsed
@@ -159,8 +164,8 @@ function Library:AddWindow(title, options)
         end
     end)
 
-    -- Métodos de Ventana
     local WindowMethods = {}
+    local FirstTab = true -- Variable para controlar la primera pestaña
 
     function WindowMethods:AddTab(tabName)
         local TabBtn = Instance.new("TextButton")
@@ -197,7 +202,7 @@ function Library:AddWindow(title, options)
             PageScroller.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 10)
         end)
 
-        -- Alternar pestañas
+        -- Alternar pestañas (Click)
         TabBtn.MouseButton1Click:Connect(function()
             for _, child in pairs(TabContainer:GetChildren()) do
                 if child:IsA("ScrollingFrame") then child.Visible = false end
@@ -213,7 +218,9 @@ function Library:AddWindow(title, options)
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end)
 
-        if #TabBar:GetChildren() == 2 then -- UIListLayout cuenta como hijo, la 1era pestaña real es el segundo elemento
+        -- Arreglo: Activar la primera pestaña automáticamente sin importar cuántas haya
+        if FirstTab then
+            FirstTab = false
             PageScroller.Visible = true
             TabBtn.TextColor3 = mainColor
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
