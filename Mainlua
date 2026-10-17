@@ -26,7 +26,6 @@ function Library:AddWindow(title, options)
     local windowTitle = title or "System Interface"
     local mainColor = options.main_color or Color3.fromRGB(255, 215, 0)
     
-    -- Ajuste automático de tamaño para que quepa en cualquier pantalla
     local viewport = workspace.CurrentCamera.ViewportSize
     local winWidth = math.clamp(options.min_size and options.min_size.X or 450, 300, viewport.X - 40)
     local winHeight = math.clamp(options.min_size and options.min_size.Y or 350, 250, viewport.Y - 120)
@@ -52,7 +51,7 @@ function Library:AddWindow(title, options)
     UIStroke.Thickness = 1.5
     UIStroke.Parent = MainFrame
 
-    -- Barra Superior (Title Bar)
+    -- Barra Superior
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
     TitleBar.Parent = MainFrame
@@ -75,7 +74,7 @@ function Library:AddWindow(title, options)
     TitleText.TextSize = 14
     TitleText.TextXAlignment = Enum.TextXAlignment.Left
 
-    -- Botón de Minimizar
+    -- Botón Minimizar
     local ToggleBtn = Instance.new("TextButton")
     ToggleBtn.Parent = TitleBar
     ToggleBtn.BackgroundTransparency = 1
@@ -86,7 +85,7 @@ function Library:AddWindow(title, options)
     ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     ToggleBtn.TextSize = 18
 
-    -- Contenedor de Pestañas
+    -- Pestañas
     local TabBar = Instance.new("ScrollingFrame")
     TabBar.Parent = MainFrame
     TabBar.BackgroundTransparency = 1
@@ -113,7 +112,7 @@ function Library:AddWindow(title, options)
     TabContainer.Position = UDim2.new(0, 10, 0, 80)
     TabContainer.Size = UDim2.new(1, -20, 1, -90)
 
-    -- Sistema de Arrastre
+    -- Arrastre
     local dragging, dragStart, startPos
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
@@ -242,7 +241,7 @@ function Library:AddWindow(title, options)
             return Btn
         end
 
-        -- Toggle (Switch)
+        -- Toggle
         function TabElements:AddToggle(toggleText, callback)
             callback = callback or function() end
             local toggled = false
@@ -297,7 +296,21 @@ function Library:AddWindow(title, options)
                 end
                 pcall(callback, toggled)
             end)
-            return ToggleFrame
+            
+            -- Retornamos el frame pero con una propiedad Set para que el Switch funcione
+            local ToggleMethods = {}
+            function ToggleMethods:Set(value)
+                toggled = value
+                if toggled then
+                    BoxBtn.BackgroundColor3 = mainColor
+                    BoxBtn.Text = "✓"
+                else
+                    BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+                    BoxBtn.Text = ""
+                end
+            end
+            -- Hacemos que ToggleFrame se comporte como la tabla que espera el script
+            return setmetatable(ToggleMethods, {__index = ToggleFrame})
         end
 
         -- Label (Texto)
@@ -311,10 +324,11 @@ function Library:AddWindow(title, options)
             Label.TextColor3 = Color3.fromRGB(200, 200, 200)
             Label.TextSize = 13
             Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.TextWrapped = true
             return Label
         end
 
-        -- TextBox (Caja de texto)
+        -- TextBox
         function TabElements:AddTextBox(placeholder, callback)
             callback = callback or function() end
             local BoxFrame = Instance.new("Frame")
@@ -346,7 +360,7 @@ function Library:AddWindow(title, options)
             return TextBox
         end
 
-        -- Dropdown (Menú desplegable)
+        -- Dropdown
         function TabElements:AddDropdown(text, callback)
             callback = callback or function() end
             local DropdownFrame = Instance.new("Frame")
