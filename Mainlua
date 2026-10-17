@@ -201,7 +201,6 @@ function Library:AddWindow(title, options)
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end)
 
-        -- Hace visible la primera pestaña por defecto
         if FirstTab then
             FirstTab = false
             PageScroller.Visible = true
@@ -211,6 +210,7 @@ function Library:AddWindow(title, options)
 
         local TabElements = {}
 
+        -- Botón
         function TabElements:AddButton(btnText, callback)
             callback = callback or function() end
             local Btn = Instance.new("TextButton")
@@ -242,6 +242,7 @@ function Library:AddWindow(title, options)
             return Btn
         end
 
+        -- Toggle (Switch)
         function TabElements:AddToggle(toggleText, callback)
             callback = callback or function() end
             local toggled = false
@@ -297,6 +298,123 @@ function Library:AddWindow(title, options)
                 pcall(callback, toggled)
             end)
             return ToggleFrame
+        end
+
+        -- Label (Texto)
+        function TabElements:AddLabel(text)
+            local Label = Instance.new("TextLabel")
+            Label.Parent = PageScroller
+            Label.BackgroundTransparency = 1
+            Label.Size = UDim2.new(1, -5, 0, 24)
+            Label.Font = Enum.Font.Gotham
+            Label.Text = text
+            Label.TextColor3 = Color3.fromRGB(200, 200, 200)
+            Label.TextSize = 13
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            return Label
+        end
+
+        -- TextBox (Caja de texto)
+        function TabElements:AddTextBox(placeholder, callback)
+            callback = callback or function() end
+            local BoxFrame = Instance.new("Frame")
+            BoxFrame.Parent = PageScroller
+            BoxFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+            BoxFrame.Size = UDim2.new(1, -5, 0, 32)
+            
+            local FrameCorner = Instance.new("UICorner")
+            FrameCorner.CornerRadius = UDim.new(0, 5)
+            FrameCorner.Parent = BoxFrame
+
+            local TextBox = Instance.new("TextBox")
+            TextBox.Parent = BoxFrame
+            TextBox.BackgroundTransparency = 1
+            TextBox.Size = UDim2.new(1, -10, 1, 0)
+            TextBox.Position = UDim2.new(0, 10, 0, 0)
+            TextBox.Font = Enum.Font.Gotham
+            TextBox.PlaceholderText = placeholder
+            TextBox.Text = ""
+            TextBox.TextColor3 = Color3.fromRGB(240, 240, 240)
+            TextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+            TextBox.TextSize = 13
+            TextBox.TextXAlignment = Enum.TextXAlignment.Left
+            TextBox.ClearTextOnFocus = false
+
+            TextBox.FocusLost:Connect(function()
+                pcall(callback, TextBox.Text)
+            end)
+            return TextBox
+        end
+
+        -- Dropdown (Menú desplegable)
+        function TabElements:AddDropdown(text, callback)
+            callback = callback or function() end
+            local DropdownFrame = Instance.new("Frame")
+            DropdownFrame.Parent = PageScroller
+            DropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+            DropdownFrame.Size = UDim2.new(1, -5, 0, 32)
+            
+            local FrameCorner = Instance.new("UICorner")
+            FrameCorner.CornerRadius = UDim.new(0, 5)
+            FrameCorner.Parent = DropdownFrame
+
+            local MainBtn = Instance.new("TextButton")
+            MainBtn.Parent = DropdownFrame
+            MainBtn.BackgroundTransparency = 1
+            MainBtn.Size = UDim2.new(1, 0, 1, 0)
+            MainBtn.Font = Enum.Font.Gotham
+            MainBtn.Text = text .. " ▼"
+            MainBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+            MainBtn.TextSize = 13
+            MainBtn.TextXAlignment = Enum.TextXAlignment.Left
+            
+            local Padding = Instance.new("UIPadding")
+            Padding.PaddingLeft = UDim.new(0, 10)
+            Padding.Parent = MainBtn
+
+            local OptionButtons = {}
+            local isOpen = false
+
+            local function RefreshLayout()
+                for i, btn in ipairs(OptionButtons) do
+                    btn.LayoutOrder = i
+                end
+            end
+
+            local function AddOption(optionText)
+                local OptBtn = Instance.new("TextButton")
+                OptBtn.Parent = PageScroller
+                OptBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+                OptBtn.Size = UDim2.new(1, -5, 0, 28)
+                OptBtn.Font = Enum.Font.Gotham
+                OptBtn.Text = "  " .. optionText
+                OptBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                OptBtn.TextSize = 12
+                OptBtn.TextXAlignment = Enum.TextXAlignment.Left
+                OptBtn.Visible = false
+                OptBtn.LayoutOrder = DropdownFrame.LayoutOrder + 1
+                
+                table.insert(OptionButtons, OptBtn)
+                RefreshLayout()
+
+                OptBtn.MouseButton1Click:Connect(function()
+                    MainBtn.Text = text .. ": " .. optionText .. " ▼"
+                    isOpen = false
+                    for _, b in ipairs(OptionButtons) do b.Visible = false end
+                    pcall(callback, optionText)
+                end)
+            end
+
+            MainBtn.MouseButton1Click:Connect(function()
+                isOpen = not isOpen
+                for _, b in ipairs(OptionButtons) do b.Visible = isOpen end
+            end)
+
+            local DropdownMethods = {}
+            function DropdownMethods:Add(optionText)
+                AddOption(optionText)
+            end
+            return DropdownMethods
         end
 
         return TabElements
