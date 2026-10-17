@@ -26,7 +26,6 @@ function Library:AddWindow(title, options)
     local windowTitle = title or "System Interface"
     local mainColor = options.main_color or Color3.fromRGB(255, 215, 0)
     
-    -- Tamaño de pantalla
     local viewport = workspace.CurrentCamera.ViewportSize
     local winWidth = math.clamp(options.min_size and options.min_size.X or 450, 300, viewport.X - 40)
     local winHeight = math.clamp(options.min_size and options.min_size.Y or 350, 250, viewport.Y - 120)
@@ -113,23 +112,28 @@ function Library:AddWindow(title, options)
     TabContainer.Position = UDim2.new(0, 10, 0, 80)
     TabContainer.Size = UDim2.new(1, -20, 1, -90)
 
-    -- Arrastre
+    -- Arrastre de Ventana
     local dragging, dragStart, startPos
     TitleBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
             startPos = MainFrame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then dragging = false end
+            
+            local inputChangedCon
+            inputChangedCon = UserInputService.InputChanged:Connect(function(moveInput)
+                if dragging and (moveInput.UserInputType == Enum.UserInputType.MouseMovement or moveInput.UserInputType == Enum.UserInputType.Touch) then
+                    local delta = moveInput.Position - dragStart
+                    MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+                end
             end)
-        end
-    end)
 
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
-            local delta = input.Position - dragStart
-            MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                    if inputChangedCon then inputChangedCon:Disconnect() end
+                end
+            end)
         end
     end)
 
@@ -153,7 +157,9 @@ function Library:AddWindow(title, options)
     local WindowMethods = {}
     local FirstTab = true
 
-    function WindowMethods:AddTab(tabName)
+    function WindowMethods:AddTab(tabName, customColor)
+        local tabColor = customColor or mainColor
+
         local TabBtn = Instance.new("TextButton")
         TabBtn.Parent = TabBar
         TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
@@ -175,16 +181,18 @@ function Library:AddWindow(title, options)
         PageScroller.Visible = false
         PageScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
         PageScroller.ScrollBarThickness = 3
-        PageScroller.ScrollBarImageColor3 = mainColor
+        PageScroller.ScrollBarImageColor3 = tabColor
 
         local PageList = Instance.new("UIListLayout")
         PageList.Parent = PageScroller
         PageList.SortOrder = Enum.SortOrder.LayoutOrder
         PageList.Padding = UDim.new(0, 6)
 
-        PageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        local function updateCanvasSize()
             PageScroller.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 10)
-        end)
+        end
+
+        PageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvasSize)
 
         TabBtn.MouseButton1Click:Connect(function()
             for _, child in pairs(TabContainer:GetChildren()) do
@@ -197,249 +205,346 @@ function Library:AddWindow(title, options)
                 end
             end
             PageScroller.Visible = true
-            TabBtn.TextColor3 = mainColor
+            TabBtn.TextColor3 = tabColor
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end)
 
         if FirstTab then
             FirstTab = false
             PageScroller.Visible = true
-            TabBtn.TextColor3 = mainColor
+            TabBtn.TextColor3 = tabColor
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end
 
-        local TabElements = {}
-        local LayoutIndex = 1
+        local function createElementLibrary(parentContainer)
+            local ContainerElements = {}
+            local LayoutIndex = 1
 
-        -- Botón
-        function TabElements:AddButton(btnText, callback)
-            callback = callback or function() end
-            local Btn = Instance.new("TextButton")
-            Btn.Parent = PageScroller
-            Btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-            Btn.BorderSizePixel = 0
-            Btn.Size = UDim2.new(1, -5, 0, 32)
-            Btn.Font = Enum.Font.GothamBold
-            Btn.Text = btnText
-            Btn.TextColor3 = Color3.fromRGB(240, 240, 240)
-            Btn.TextSize = 13
-            Btn.LayoutOrder = LayoutIndex
-            LayoutIndex += 1
+            -- Botón
+            function ContainerElements:AddButton(btnText, callback)
+                callback = callback or function() end
+                local Btn = Instance.new("TextButton")
+                Btn.Parent = parentContainer
+                Btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+                Btn.BorderSizePixel = 0
+                Btn.Size = UDim2.new(1, -5, 0, 32)
+                Btn.Font = Enum.Font.GothamBold
+                Btn.Text = btnText
+                Btn.TextColor3 = Color3.fromRGB(240, 240, 240)
+                Btn.TextSize = 13
+                Btn.LayoutOrder = LayoutIndex
+                LayoutIndex += 1
 
-            local BtnCorner = Instance.new("UICorner")
-            BtnCorner.CornerRadius = UDim.new(0, 5)
-            BtnCorner.Parent = Btn
+                local BtnCorner = Instance.new("UICorner")
+                BtnCorner.CornerRadius = UDim.new(0, 5)
+                BtnCorner.Parent = Btn
 
-            local BtnStroke = Instance.new("UIStroke")
-            BtnStroke.Color = Color3.fromRGB(50, 50, 70)
-            BtnStroke.Thickness = 1
-            BtnStroke.Parent = Btn
+                local BtnStroke = Instance.new("UIStroke")
+                BtnStroke.Color = Color3.fromRGB(50, 50, 70)
+                BtnStroke.Thickness = 1
+                BtnStroke.Parent = Btn
 
-            Btn.MouseButton1Click:Connect(function()
-                TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = mainColor}):Play()
-                task.delay(0.1, function()
-                    TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(28, 28, 38)}):Play()
+                Btn.MouseButton1Click:Connect(function()
+                    TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = tabColor}):Play()
+                    task.delay(0.1, function()
+                        TweenService:Create(Btn, TweenInfo.new(0.1), {BackgroundColor3 = Color3.fromRGB(28, 28, 38)}):Play()
+                    end)
+                    pcall(callback)
                 end)
-                pcall(callback)
-            end)
-            return Btn
-        end
-
-        -- Toggle
-        function TabElements:AddToggle(toggleText, callback)
-            callback = callback or function() end
-            local toggled = false
-
-            local ToggleFrame = Instance.new("Frame")
-            ToggleFrame.Parent = PageScroller
-            ToggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-            ToggleFrame.Size = UDim2.new(1, -5, 0, 32)
-            ToggleFrame.LayoutOrder = LayoutIndex
-            LayoutIndex += 1
-
-            local FrameCorner = Instance.new("UICorner")
-            FrameCorner.CornerRadius = UDim.new(0, 5)
-            FrameCorner.Parent = ToggleFrame
-
-            local TextLab = Instance.new("TextLabel")
-            TextLab.Parent = ToggleFrame
-            TextLab.BackgroundTransparency = 1
-            TextLab.Position = UDim2.new(0, 10, 0, 0)
-            TextLab.Size = UDim2.new(0.7, 0, 1, 0)
-            TextLab.Font = Enum.Font.Gotham
-            TextLab.Text = toggleText
-            TextLab.TextColor3 = Color3.fromRGB(220, 220, 220)
-            TextLab.TextSize = 13
-            TextLab.TextXAlignment = Enum.TextXAlignment.Left
-
-            local BoxBtn = Instance.new("TextButton")
-            BoxBtn.Parent = ToggleFrame
-            BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-            BoxBtn.Position = UDim2.new(1, -32, 0.5, -10)
-            BoxBtn.Size = UDim2.new(0, 20, 0, 20)
-            BoxBtn.Font = Enum.Font.GothamBold
-            BoxBtn.Text = ""
-            BoxBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
-            BoxBtn.TextSize = 14
-
-            local BoxCorner = Instance.new("UICorner")
-            BoxCorner.CornerRadius = UDim.new(0, 4)
-            BoxCorner.Parent = BoxBtn
-
-            local BoxStroke = Instance.new("UIStroke")
-            BoxStroke.Color = mainColor
-            BoxStroke.Thickness = 1
-            BoxStroke.Parent = BoxBtn
-
-            BoxBtn.MouseButton1Click:Connect(function()
-                toggled = not toggled
-                if toggled then
-                    BoxBtn.BackgroundColor3 = mainColor
-                    BoxBtn.Text = "✓"
-                else
-                    BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-                    BoxBtn.Text = ""
-                end
-                pcall(callback, toggled)
-            end)
-            
-            local ToggleMethods = {}
-            function ToggleMethods:Set(value)
-                toggled = value
-                if toggled then
-                    BoxBtn.BackgroundColor3 = mainColor
-                    BoxBtn.Text = "✓"
-                else
-                    BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-                    BoxBtn.Text = ""
-                end
-            end
-            return setmetatable(ToggleMethods, {__index = ToggleFrame})
-        end
-
-        -- Label (Texto)
-        function TabElements:AddLabel(text)
-            local Label = Instance.new("TextLabel")
-            Label.Parent = PageScroller
-            Label.BackgroundTransparency = 1
-            Label.Size = UDim2.new(1, -5, 0, 24)
-            Label.Font = Enum.Font.GothamBold
-            Label.Text = text
-            Label.TextColor3 = Color3.fromRGB(240, 240, 240)
-            Label.TextSize = 14
-            Label.TextXAlignment = Enum.TextXAlignment.Left
-            Label.LayoutOrder = LayoutIndex
-            LayoutIndex += 1
-            return Label
-        end
-
-        -- TextBox
-        function TabElements:AddTextBox(placeholder, callback)
-            callback = callback or function() end
-            local BoxFrame = Instance.new("Frame")
-            BoxFrame.Parent = PageScroller
-            BoxFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-            BoxFrame.Size = UDim2.new(1, -5, 0, 32)
-            BoxFrame.LayoutOrder = LayoutIndex
-            LayoutIndex += 1
-            
-            local FrameCorner = Instance.new("UICorner")
-            FrameCorner.CornerRadius = UDim.new(0, 5)
-            FrameCorner.Parent = BoxFrame
-
-            local TextBox = Instance.new("TextBox")
-            TextBox.Parent = BoxFrame
-            TextBox.BackgroundTransparency = 1
-            TextBox.Size = UDim2.new(1, -10, 1, 0)
-            TextBox.Position = UDim2.new(0, 10, 0, 0)
-            TextBox.Font = Enum.Font.Gotham
-            TextBox.PlaceholderText = placeholder
-            TextBox.Text = ""
-            TextBox.TextColor3 = Color3.fromRGB(240, 240, 240)
-            TextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
-            TextBox.TextSize = 13
-            TextBox.TextXAlignment = Enum.TextXAlignment.Left
-            TextBox.ClearTextOnFocus = false
-
-            TextBox.FocusLost:Connect(function()
-                pcall(callback, TextBox.Text)
-            end)
-            return TextBox
-        end
-
-        -- Dropdown
-        function TabElements:AddDropdown(text, callback)
-            callback = callback or function() end
-            local DropdownFrame = Instance.new("Frame")
-            DropdownFrame.Parent = PageScroller
-            DropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-            DropdownFrame.Size = UDim2.new(1, -5, 0, 32)
-            DropdownFrame.LayoutOrder = LayoutIndex
-            LayoutIndex += 1
-            
-            local FrameCorner = Instance.new("UICorner")
-            FrameCorner.CornerRadius = UDim.new(0, 5)
-            FrameCorner.Parent = DropdownFrame
-
-            local MainBtn = Instance.new("TextButton")
-            MainBtn.Parent = DropdownFrame
-            MainBtn.BackgroundTransparency = 1
-            MainBtn.Size = UDim2.new(1, 0, 1, 0)
-            MainBtn.Font = Enum.Font.Gotham
-            MainBtn.Text = text .. " ▼"
-            MainBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
-            MainBtn.TextSize = 13
-            MainBtn.TextXAlignment = Enum.TextXAlignment.Left
-            
-            local Padding = Instance.new("UIPadding")
-            Padding.PaddingLeft = UDim.new(0, 10)
-            Padding.Parent = MainBtn
-
-            local OptionButtons = {}
-            local isOpen = false
-
-            local function RefreshLayout()
-                for i, btn in ipairs(OptionButtons) do
-                    btn.LayoutOrder = LayoutIndex + i
-                end
+                updateCanvasSize()
+                return Btn
             end
 
-            local function AddOption(optionText)
-                local OptBtn = Instance.new("TextButton")
-                OptBtn.Parent = PageScroller
-                OptBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
-                OptBtn.Size = UDim2.new(1, -5, 0, 28)
-                OptBtn.Font = Enum.Font.Gotham
-                OptBtn.Text = "  " .. optionText
-                OptBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-                OptBtn.TextSize = 12
-                OptBtn.TextXAlignment = Enum.TextXAlignment.Left
-                OptBtn.Visible = false
+            -- Switch (Toggle)
+            function ContainerElements:AddSwitch(toggleText, callback)
+                callback = callback or function() end
+                local toggled = false
+
+                local ToggleFrame = Instance.new("Frame")
+                ToggleFrame.Parent = parentContainer
+                ToggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+                ToggleFrame.Size = UDim2.new(1, -5, 0, 32)
+                ToggleFrame.LayoutOrder = LayoutIndex
+                LayoutIndex += 1
+
+                local FrameCorner = Instance.new("UICorner")
+                FrameCorner.CornerRadius = UDim.new(0, 5)
+                FrameCorner.Parent = ToggleFrame
+
+                local TextLab = Instance.new("TextLabel")
+                TextLab.Parent = ToggleFrame
+                TextLab.BackgroundTransparency = 1
+                TextLab.Position = UDim2.new(0, 10, 0, 0)
+                TextLab.Size = UDim2.new(0.7, 0, 1, 0)
+                TextLab.Font = Enum.Font.Gotham
+                TextLab.Text = toggleText
+                TextLab.TextColor3 = Color3.fromRGB(220, 220, 220)
+                TextLab.TextSize = 13
+                TextLab.TextXAlignment = Enum.TextXAlignment.Left
+
+                local BoxBtn = Instance.new("TextButton")
+                BoxBtn.Parent = ToggleFrame
+                BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+                BoxBtn.Position = UDim2.new(1, -32, 0.5, -10)
+                BoxBtn.Size = UDim2.new(0, 20, 0, 20)
+                BoxBtn.Font = Enum.Font.GothamBold
+                BoxBtn.Text = ""
+                BoxBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
+                BoxBtn.TextSize = 14
+
+                local BoxCorner = Instance.new("UICorner")
+                BoxCorner.CornerRadius = UDim.new(0, 4)
+                BoxCorner.Parent = BoxBtn
+
+                local BoxStroke = Instance.new("UIStroke")
+                BoxStroke.Color = tabColor
+                BoxStroke.Thickness = 1
+                BoxStroke.Parent = BoxBtn
+
+                local function UpdateVisuals()
+                    if toggled then
+                        BoxBtn.BackgroundColor3 = tabColor
+                        BoxBtn.Text = "✓"
+                    else
+                        BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
+                        BoxBtn.Text = ""
+                    end
+                end
+
+                BoxBtn.MouseButton1Click:Connect(function()
+                    toggled = not toggled
+                    UpdateVisuals()
+                    pcall(callback, toggled)
+                end)
                 
-                table.insert(OptionButtons, OptBtn)
-                RefreshLayout()
+                local ToggleMethods = {}
+                function ToggleMethods:Set(value)
+                    toggled = value
+                    UpdateVisuals()
+                    pcall(callback, toggled)
+                end
+                updateCanvasSize()
+                return setmetatable(ToggleMethods, {__index = ToggleFrame})
+            end
 
-                OptBtn.MouseButton1Click:Connect(function()
-                    MainBtn.Text = text .. ": " .. optionText .. " ▼"
-                    isOpen = false
-                    for _, b in ipairs(OptionButtons) do b.Visible = false end
-                    pcall(callback, optionText)
+            -- Label
+            function ContainerElements:AddLabel(text)
+                local Label = Instance.new("TextLabel")
+                Label.Parent = parentContainer
+                Label.BackgroundTransparency = 1
+                Label.Size = UDim2.new(1, -5, 0, 24)
+                Label.Font = Enum.Font.GothamBold
+                Label.Text = text
+                Label.TextColor3 = Color3.fromRGB(240, 240, 240)
+                Label.TextSize = 14
+                Label.TextXAlignment = Enum.TextXAlignment.Left
+                Label.LayoutOrder = LayoutIndex
+                LayoutIndex += 1
+                updateCanvasSize()
+                return Label
+            end
+
+            -- TextBox
+            function ContainerElements:AddTextBox(placeholder, callback)
+                callback = callback or function() end
+                local BoxFrame = Instance.new("Frame")
+                BoxFrame.Parent = parentContainer
+                BoxFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+                BoxFrame.Size = UDim2.new(1, -5, 0, 32)
+                BoxFrame.LayoutOrder = LayoutIndex
+                LayoutIndex += 1
+                
+                local FrameCorner = Instance.new("UICorner")
+                FrameCorner.CornerRadius = UDim.new(0, 5)
+                FrameCorner.Parent = BoxFrame
+
+                local TextBox = Instance.new("TextBox")
+                TextBox.Parent = BoxFrame
+                TextBox.BackgroundTransparency = 1
+                TextBox.Size = UDim2.new(1, -10, 1, 0)
+                TextBox.Position = UDim2.new(0, 10, 0, 0)
+                TextBox.Font = Enum.Font.Gotham
+                TextBox.PlaceholderText = placeholder
+                TextBox.Text = ""
+                TextBox.TextColor3 = Color3.fromRGB(240, 240, 240)
+                TextBox.PlaceholderColor3 = Color3.fromRGB(120, 120, 120)
+                TextBox.TextSize = 13
+                TextBox.TextXAlignment = Enum.TextXAlignment.Left
+                TextBox.ClearTextOnFocus = false
+
+                TextBox.FocusLost:Connect(function()
+                    pcall(callback, TextBox.Text)
                 end)
+                updateCanvasSize()
+                return TextBox
             end
 
-            MainBtn.MouseButton1Click:Connect(function()
-                isOpen = not isOpen
-                for _, b in ipairs(OptionButtons) do b.Visible = isOpen end
-            end)
+            -- Dropdown
+            function ContainerElements:AddDropdown(text, callback)
+                callback = callback or function() end
+                local DropdownFrame = Instance.new("Frame")
+                DropdownFrame.Parent = parentContainer
+                DropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
+                DropdownFrame.Size = UDim2.new(1, -5, 0, 32)
+                DropdownFrame.ClipsDescendants = true
+                DropdownFrame.LayoutOrder = LayoutIndex
+                LayoutIndex += 1
+                
+                local FrameCorner = Instance.new("UICorner")
+                FrameCorner.CornerRadius = UDim.new(0, 5)
+                FrameCorner.Parent = DropdownFrame
 
-            local DropdownMethods = {}
-            function DropdownMethods:Add(optionText)
-                AddOption(optionText)
+                local MainBtn = Instance.new("TextButton")
+                MainBtn.Parent = DropdownFrame
+                MainBtn.BackgroundTransparency = 1
+                MainBtn.Size = UDim2.new(1, 0, 0, 32)
+                MainBtn.Font = Enum.Font.Gotham
+                MainBtn.Text = text .. " ▼"
+                MainBtn.TextColor3 = Color3.fromRGB(220, 220, 220)
+                MainBtn.TextSize = 13
+                MainBtn.TextXAlignment = Enum.TextXAlignment.Left
+                
+                local Padding = Instance.new("UIPadding")
+                Padding.PaddingLeft = UDim.new(0, 10)
+                Padding.Parent = MainBtn
+
+                local OptionContainer = Instance.new("Frame")
+                OptionContainer.Parent = DropdownFrame
+                OptionContainer.BackgroundTransparency = 1
+                OptionContainer.Position = UDim2.new(0, 0, 0, 32)
+                OptionContainer.Size = UDim2.new(1, 0, 1, -32)
+
+                local OptionList = Instance.new("UIListLayout")
+                OptionList.Parent = OptionContainer
+                OptionList.SortOrder = Enum.SortOrder.LayoutOrder
+                OptionList.Padding = UDim.new(0, 2)
+
+                local isOpen = false
+                local optionCount = 0
+
+                local function ToggleDropdown()
+                    isOpen = not isOpen
+                    if isOpen then
+                        DropdownFrame.Size = UDim2.new(1, -5, 0, 32 + (optionCount * 30))
+                    else
+                        DropdownFrame.Size = UDim2.new(1, -5, 0, 32)
+                    end
+                    updateCanvasSize()
+                end
+
+                MainBtn.MouseButton1Click:Connect(ToggleDropdown)
+
+                local DropdownMethods = {}
+                function DropdownMethods:Add(optionText)
+                    optionCount += 1
+                    local OptBtn = Instance.new("TextButton")
+                    OptBtn.Parent = OptionContainer
+                    OptBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 28)
+                    OptBtn.BorderSizePixel = 0
+                    OptBtn.Size = UDim2.new(1, -10, 0, 28)
+                    OptBtn.Font = Enum.Font.Gotham
+                    OptBtn.Text = optionText
+                    OptBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+                    OptBtn.TextSize = 12
+                    OptBtn.TextXAlignment = Enum.TextXAlignment.Left
+
+                    local OptPadding = Instance.new("UIPadding")
+                    OptPadding.PaddingLeft = UDim.new(0, 10)
+                    OptPadding.Parent = OptBtn
+
+                    local OptCorner = Instance.new("UICorner")
+                    OptCorner.CornerRadius = UDim.new(0, 4)
+                    OptCorner.Parent = OptBtn
+
+                    OptBtn.MouseButton1Click:Connect(function()
+                        MainBtn.Text = text .. ": " .. optionText .. " ▲"
+                        ToggleDropdown()
+                        pcall(callback, optionText)
+                    end)
+                end
+
+                function DropdownMethods:Remove(optionText)
+                    for _, child in pairs(OptionContainer:GetChildren()) do
+                        if child:IsA("TextButton") and child.Text:gsub("^%s*", "") == optionText then
+                            child:Destroy()
+                            optionCount = math.max(0, optionCount - 1)
+                            if isOpen then
+                                DropdownFrame.Size = UDim2.new(1, -5, 0, 32 + (optionCount * 30))
+                            end
+                            updateCanvasSize()
+                            break
+                        end
+                    end
+                end
+
+                updateCanvasSize()
+                return DropdownMethods
             end
-            return DropdownMethods
+
+            -- Soporte para Folders (Secciones colapsables)
+            function ContainerElements:AddFolder(folderName)
+                local FolderFrame = Instance.new("Frame")
+                FolderFrame.Parent = parentContainer
+                FolderFrame.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
+                FolderFrame.Size = UDim2.new(1, -5, 0, 32)
+                FolderFrame.ClipsDescendants = true
+                FolderFrame.LayoutOrder = LayoutIndex
+                LayoutIndex += 1
+
+                local FolderCorner = Instance.new("UICorner")
+                FolderCorner.CornerRadius = UDim.new(0, 5)
+                FolderCorner.Parent = FolderFrame
+
+                local FolderBtn = Instance.new("TextButton")
+                FolderBtn.Parent = FolderFrame
+                FolderBtn.BackgroundTransparency = 1
+                FolderBtn.Size = UDim2.new(1, 0, 0, 32)
+                FolderBtn.Font = Enum.Font.GothamBold
+                FolderBtn.Text = "  > " .. folderName
+                FolderBtn.TextColor3 = tabColor
+                FolderBtn.TextSize = 13
+                FolderBtn.TextXAlignment = Enum.TextXAlignment.Left
+
+                local FolderContent = Instance.new("Frame")
+                FolderContent.Parent = FolderFrame
+                FolderContent.BackgroundTransparency = 1
+                FolderContent.Position = UDim2.new(0, 10, 0, 35)
+                FolderContent.Size = UDim2.new(1, -20, 1, -35)
+
+                local FolderList = Instance.new("UIListLayout")
+                FolderList.Parent = FolderContent
+                FolderList.SortOrder = Enum.SortOrder.LayoutOrder
+                FolderList.Padding = UDim.new(0, 6)
+
+                local isFolderOpen = false
+
+                FolderBtn.MouseButton1Click:Connect(function()
+                    isFolderOpen = not isFolderOpen
+                    if isFolderOpen then
+                        FolderBtn.Text = "  v " .. folderName
+                        FolderFrame.Size = UDim2.new(1, -5, 0, FolderList.AbsoluteContentSize.Y + 45)
+                    else
+                        FolderBtn.Text = "  > " .. folderName
+                        FolderFrame.Size = UDim2.new(1, -5, 0, 32)
+                    end
+                    updateCanvasSize()
+                end)
+
+                FolderList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                    if isFolderOpen then
+                        FolderFrame.Size = UDim2.new(1, -5, 0, FolderList.AbsoluteContentSize.Y + 45)
+                        updateCanvasSize()
+                    end
+                end)
+
+                updateCanvasSize()
+                return createElementLibrary(FolderContent)
+            end
+
+            return ContainerElements
         end
 
-        return TabElements
+        return createElementLibrary(PageScroller)
     end
 
     return WindowMethods
