@@ -26,6 +26,7 @@ function Library:AddWindow(title, options)
     local windowTitle = title or "System Interface"
     local mainColor = options.main_color or Color3.fromRGB(255, 215, 0)
     
+    -- Tamaño de pantalla
     local viewport = workspace.CurrentCamera.ViewportSize
     local winWidth = math.clamp(options.min_size and options.min_size.X or 450, 300, viewport.X - 40)
     local winHeight = math.clamp(options.min_size and options.min_size.Y or 350, 250, viewport.Y - 120)
@@ -208,6 +209,7 @@ function Library:AddWindow(title, options)
         end
 
         local TabElements = {}
+        local LayoutIndex = 1
 
         -- Botón
         function TabElements:AddButton(btnText, callback)
@@ -221,6 +223,8 @@ function Library:AddWindow(title, options)
             Btn.Text = btnText
             Btn.TextColor3 = Color3.fromRGB(240, 240, 240)
             Btn.TextSize = 13
+            Btn.LayoutOrder = LayoutIndex
+            LayoutIndex += 1
 
             local BtnCorner = Instance.new("UICorner")
             BtnCorner.CornerRadius = UDim.new(0, 5)
@@ -250,6 +254,8 @@ function Library:AddWindow(title, options)
             ToggleFrame.Parent = PageScroller
             ToggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
             ToggleFrame.Size = UDim2.new(1, -5, 0, 32)
+            ToggleFrame.LayoutOrder = LayoutIndex
+            LayoutIndex += 1
 
             local FrameCorner = Instance.new("UICorner")
             FrameCorner.CornerRadius = UDim.new(0, 5)
@@ -297,7 +303,6 @@ function Library:AddWindow(title, options)
                 pcall(callback, toggled)
             end)
             
-            -- Retornamos el frame pero con una propiedad Set para que el Switch funcione
             local ToggleMethods = {}
             function ToggleMethods:Set(value)
                 toggled = value
@@ -309,7 +314,6 @@ function Library:AddWindow(title, options)
                     BoxBtn.Text = ""
                 end
             end
-            -- Hacemos que ToggleFrame se comporte como la tabla que espera el script
             return setmetatable(ToggleMethods, {__index = ToggleFrame})
         end
 
@@ -319,12 +323,13 @@ function Library:AddWindow(title, options)
             Label.Parent = PageScroller
             Label.BackgroundTransparency = 1
             Label.Size = UDim2.new(1, -5, 0, 24)
-            Label.Font = Enum.Font.Gotham
+            Label.Font = Enum.Font.GothamBold
             Label.Text = text
-            Label.TextColor3 = Color3.fromRGB(200, 200, 200)
-            Label.TextSize = 13
+            Label.TextColor3 = Color3.fromRGB(240, 240, 240)
+            Label.TextSize = 14
             Label.TextXAlignment = Enum.TextXAlignment.Left
-            Label.TextWrapped = true
+            Label.LayoutOrder = LayoutIndex
+            LayoutIndex += 1
             return Label
         end
 
@@ -335,6 +340,8 @@ function Library:AddWindow(title, options)
             BoxFrame.Parent = PageScroller
             BoxFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
             BoxFrame.Size = UDim2.new(1, -5, 0, 32)
+            BoxFrame.LayoutOrder = LayoutIndex
+            LayoutIndex += 1
             
             local FrameCorner = Instance.new("UICorner")
             FrameCorner.CornerRadius = UDim.new(0, 5)
@@ -367,6 +374,8 @@ function Library:AddWindow(title, options)
             DropdownFrame.Parent = PageScroller
             DropdownFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
             DropdownFrame.Size = UDim2.new(1, -5, 0, 32)
+            DropdownFrame.LayoutOrder = LayoutIndex
+            LayoutIndex += 1
             
             local FrameCorner = Instance.new("UICorner")
             FrameCorner.CornerRadius = UDim.new(0, 5)
@@ -391,7 +400,7 @@ function Library:AddWindow(title, options)
 
             local function RefreshLayout()
                 for i, btn in ipairs(OptionButtons) do
-                    btn.LayoutOrder = i
+                    btn.LayoutOrder = LayoutIndex + i
                 end
             end
 
@@ -406,7 +415,6 @@ function Library:AddWindow(title, options)
                 OptBtn.TextSize = 12
                 OptBtn.TextXAlignment = Enum.TextXAlignment.Left
                 OptBtn.Visible = false
-                OptBtn.LayoutOrder = DropdownFrame.LayoutOrder + 1
                 
                 table.insert(OptionButtons, OptBtn)
                 RefreshLayout()
