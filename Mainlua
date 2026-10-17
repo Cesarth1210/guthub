@@ -189,7 +189,7 @@ function Library:AddWindow(title, options)
         PageList.Padding = UDim.new(0, 6)
 
         local function updateCanvasSize()
-            PageScroller.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 10)
+            PageScroller.CanvasSize = UDim2.new(0, 0, 0, PageList.AbsoluteContentSize.Y + 20)
         end
 
         PageList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(updateCanvasSize)
@@ -216,7 +216,7 @@ function Library:AddWindow(title, options)
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end
 
-        local function createElementLibrary(parentContainer)
+        local function createElementLibrary(parentContainer, isFolderContainer)
             local ContainerElements = {}
             local LayoutIndex = 1
 
@@ -481,7 +481,7 @@ function Library:AddWindow(title, options)
                 return DropdownMethods
             end
 
-            -- Soporte para Folders (Secciones colapsables)
+            -- Soporte para Folders
             function ContainerElements:AddFolder(folderName)
                 local FolderFrame = Instance.new("Frame")
                 FolderFrame.Parent = parentContainer
@@ -538,13 +538,13 @@ function Library:AddWindow(title, options)
                 end)
 
                 updateCanvasSize()
-                return createElementLibrary(FolderContent)
+                return createElementLibrary(FolderContent, true)
             end
 
             return ContainerElements
         end
 
-        return createElementLibrary(PageScroller)
+        return createElementLibrary(PageScroller, false)
     end
 
     return WindowMethods
