@@ -1,86 +1,82 @@
--- ========================================================
--- LIBRERÍA DE INTERFAZ (MATHIAS) - CORREGIDA Y OPTIMIZADA
--- ========================================================
-
-Local a = { main_color = Color3.fromRGB(255, 255, 0), min_size = Vector2.new(400, 300), toggle_key = Enum.KeyCode.RightShift, can_resize = true } 
+local a = { main_color = Color3.fromRGB(255, 255, 0), min_size = Vector2.new(400, 300), toggle_key = Enum.KeyCode.RightShift, can_resize = true } 
 do 
-    Local b = game:GetService("CoreGui"):FindFirstChild("imgui") 
-    If b then b:Destroy() end 
+    local b = game:GetService("CoreGui"):FindFirstChild("imgui") 
+    if b then b:Destroy() end 
 end 
 
-Local b = Instance.new("ScreenGui") 
-Local c = Instance.new("Frame") 
-Local d = Instance.new("TextLabel") 
-Local e = Instance.new("ImageLabel") 
-Local f = Instance.new("Frame") 
-Local g = Instance.new("Bar") 
-Local h = Instance.new("ImageButton") 
-Local i = Instance.new("ImageLabel") 
-Local j = Instance.new("ImageLabel") 
-Local k = Instance.new("Frame") 
-Local l = Instance.new("TextLabel") 
-Local m = Instance.new("ImageLabel") 
-Local n = Instance.new("ScrollingFrame") 
-Local o = Instance.new("Frame") 
-Local p = Instance.new("UIListLayout") 
-Local q = Instance.new("Frame") 
-Local r = Instance.new("Frame") 
-Local s = Instance.new("UIListLayout") 
-Local t = Instance.new("TextBox") 
-Local u = Instance.new("ImageLabel") 
-Local v = Instance.new("ImageLabel") 
-Local w = Instance.new("TextLabel") 
-Local x = Instance.new("ImageLabel") 
-Local y = Instance.new("TextLabel") 
-Local z = Instance.new("TextLabel") 
-Local A = Instance.new("TextLabel") 
-Local B = Instance.new("ImageLabel") 
-Local C = Instance.new("UIListLayout") 
-Local D = Instance.new("TextButton") 
-Local E = Instance.new("ImageLabel") 
-Local F = Instance.new("ImageButton") 
-Local G = Instance.new("ScrollingFrame") 
-Local H = Instance.new("UIListLayout") 
-Local I = Instance.new("ImageLabel") 
-Local J = Instance.new("TextButton") 
-Local K = Instance.new("ImageLabel") 
-Local L = Instance.new("ImageLabel") 
-Local M = Instance.new("TextButton") 
-Local N = Instance.new("ImageLabel") 
-Local O = Instance.new("ImageLabel") 
-Local P = Instance.new("Frame") 
-Local Q = Instance.new("UIListLayout") 
-Local R = Instance.new("Frame") 
-Local S = Instance.new("UIListLayout") 
-Local T = Instance.new("Console") 
-Local U = Instance.new("ScrollingFrame") 
-Local V = Instance.new("TextBox") 
-Local W = Instance.new("TextLabel") 
-Local X = Instance.new("TextLabel") 
-Local Y = Instance.new("TextLabel") 
-Local Z = Instance.new("TextLabel") 
-Local _ = Instance.new("TextLabel") 
-Local a0 = Instance.new("TextLabel") 
-Local a1 = Instance.new("TextLabel") 
-Local a2 = Instance.new("TextLabel") 
-Local a3 = Instance.new("TextLabel") 
-Local a4 = Instance.new("ImageLabel") 
-Local a5 = Instance.new("ImageLabel") 
-Local a6 = Instance.new("ImageLabel") 
-Local a7 = Instance.new("ImageLabel") 
-Local a8 = Instance.new("ImageLabel") 
-Local a9 = Instance.new("Frame") 
-Local aa = Instance.new("TextButton") 
-Local ab = Instance.new("ImageLabel") 
-Local ac = Instance.new("TextLabel") 
-Local ad = Instance.new("TextButton") 
-Local ae = Instance.new("ImageLabel") 
-Local af = Instance.new("TextButton") 
-Local ag = Instance.new("ImageLabel") 
-Local ah = Instance.new("TextLabel") 
-Local ai = Instance.new("TextButton") 
-Local aj = Instance.new("ImageLabel") 
-Local ak = Instance.new("Frame") 
+local b = Instance.new("ScreenGui") 
+local c = Instance.new("Frame") 
+local d = Instance.new("TextLabel") 
+local e = Instance.new("ImageLabel") 
+local f = Instance.new("Frame") 
+local g = Instance.new("Frame") 
+local h = Instance.new("ImageButton") 
+local i = Instance.new("ImageLabel") 
+local j = Instance.new("ImageLabel") 
+local k = Instance.new("Frame") 
+local l = Instance.new("TextLabel") 
+local m = Instance.new("ImageLabel") 
+local n = Instance.new("ScrollingFrame") 
+local o = Instance.new("Frame") 
+local p = Instance.new("UIListLayout") 
+local q = Instance.new("Frame") 
+local r = Instance.new("Frame") 
+local s = Instance.new("UIListLayout") 
+local t = Instance.new("TextBox") 
+local u = Instance.new("ImageLabel") 
+local v = Instance.new("ImageLabel") 
+local w = Instance.new("TextLabel") 
+local x = Instance.new("ImageLabel") 
+local y = Instance.new("TextLabel") 
+local z = Instance.new("TextLabel") 
+local A = Instance.new("TextLabel") 
+local B = Instance.new("ImageLabel") 
+local C = Instance.new("UIListLayout") 
+local D = Instance.new("TextButton") 
+local E = Instance.new("ImageLabel") 
+local F = Instance.new("ImageButton") 
+local G = Instance.new("ScrollingFrame") 
+local H = Instance.new("UIListLayout") 
+local I = Instance.new("ImageLabel") 
+local J = Instance.new("TextButton") 
+local K = Instance.new("ImageLabel") 
+local L = Instance.new("ImageLabel") 
+local M = Instance.new("TextButton") 
+local N = Instance.new("ImageLabel") 
+local O = Instance.new("ImageLabel") 
+local P = Instance.new("Frame") 
+local Q = Instance.new("UIListLayout") 
+local R = Instance.new("Frame") 
+local S = Instance.new("UIListLayout") 
+local T = Instance.new("Frame") 
+local U = Instance.new("ScrollingFrame") 
+local V = Instance.new("TextBox") 
+local W = Instance.new("TextLabel") 
+local X = Instance.new("TextLabel") 
+local Y = Instance.new("TextLabel") 
+local Z = Instance.new("TextLabel") 
+local _ = Instance.new("TextLabel") 
+local a0 = Instance.new("TextLabel") 
+local a1 = Instance.new("TextLabel") 
+local a2 = Instance.new("TextLabel") 
+local a3 = Instance.new("TextLabel") 
+local a4 = Instance.new("ImageLabel") 
+local a5 = Instance.new("ImageLabel") 
+local a6 = Instance.new("ImageLabel") 
+local a7 = Instance.new("ImageLabel") 
+local a8 = Instance.new("ImageLabel") 
+local a9 = Instance.new("Frame") 
+local aa = Instance.new("TextButton") 
+local ab = Instance.new("ImageLabel") 
+local ac = Instance.new("TextLabel") 
+local ad = Instance.new("TextButton") 
+local ae = Instance.new("ImageLabel") 
+local af = Instance.new("TextButton") 
+local ag = Instance.new("ImageLabel") 
+local ah = Instance.new("TextLabel") 
+local ai = Instance.new("TextButton") 
+local aj = Instance.new("ImageLabel") 
+local ak = Instance.new("Frame") 
 
 b.Name = "imgui" 
 b.Parent = game:GetService("CoreGui") or gethui() 
@@ -845,8 +841,8 @@ end
 
 at(al.InputBegan:Connect(function(ax, ay) 
     if ax.KeyCode == (typeof(a.toggle_key) == "EnumItem" and a.toggle_key or Enum.KeyCode.RightShift) then 
-        if script and script.Parent and script.Parent.Enabled then 
-            script.Parent.Enabled = not script.Parent.Enabled 
+        if b and b.Enabled then 
+            b.Enabled = not b.Enabled 
         end 
     end 
 end)) 
@@ -1116,7 +1112,6 @@ function bd:AddWindow(bi, bj)
         local bL = bK:FindFirstChild("TabScrolling") 
         local bM = bL:FindFirstChild("TabButtons") 
         local bN = nil 
-        local bO = nil 
 
         local function bP() 
             local bQ = 0 
@@ -1291,6 +1286,157 @@ function bd:AddWindow(bi, bj)
                     end 
                     return cr, cs 
                 end 
+
+                function bU:AddDropdown(cV, co) 
+                    local cW = {} 
+                    cV = tostring(cV or "New Dropdown") 
+                    co = typeof(co) == "function" and co or function() end 
+                    local cX = c:FindFirstChild("Dropdown"):Clone() 
+                    local cY = cX:FindFirstChild("Box") 
+                    local cZ = cY:FindFirstChild("Objects") 
+                    local cF = cX:FindFirstChild("Indicator") 
+                    cX.ZIndex = cX.ZIndex + bc * 10 
+                    cY.ZIndex = cY.ZIndex + bc * 10 
+                    cZ.ZIndex = cZ.ZIndex + bc * 10 
+                    cF.ZIndex = cF.ZIndex + bc * 10 
+                    cX.Size = UDim2.new(0.5, -5, 0, 20) 
+                    local c_ = cX:GetChildren()[3] 
+                    if c_ then
+                        c_.ZIndex = c_.ZIndex + bc * 10 
+                        c_.ImageTransparency = bj.title_bar_transparency or 0 
+                        aH(c_, {Color3.fromRGB(200, 200, 0)}, 0) 
+                    end
+                    cY.ImageTransparency = bj.background_transparency or 0.1 
+                    aH(cY, bj.background, 0) 
+                    local d0 = Instance.new("UICorner") 
+                    d0.CornerRadius = UDim.new(0, 6) 
+                    d0.Parent = cY 
+                    cZ.BackgroundTransparency = 1 
+                    cZ.Position = UDim2.new(0, 0, 0, 0) 
+                    cZ.Size = UDim2.new(1, 0, 1, 0) 
+                    local c1 = c0:FindFirstChild("TabScroller") 
+                    cX.Parent = c1 or c0 
+                    cX.Text = " " .. cV 
+                    cY.Size = UDim2.new(1, 0, 0, 0) 
+                    cY.Position = UDim2.new(0, 0, 0, 25) 
+                    cX.TextColor3 = Color3.new(1, 1, 1) 
+                    local bF = false 
+                    local d1 = false 
+                    cX.MouseButton1Click:Connect(function() 
+                        bF = not bF 
+                        local d2 = math.min((#cZ:GetChildren() - 1) * 20, 200) 
+                        if #cZ:GetChildren() - 1 >= 10 then 
+                            cZ.CanvasSize = UDim2.new(0, 0, (#cZ:GetChildren() - 1) * 0.1, 0) 
+                        end 
+                        if bF then 
+                            if bk then return end 
+                            bk = true 
+                            local d3 = cX.AbsolutePosition.Y 
+                            local d4 = cX.AbsoluteSize.Y 
+                            local d5 = e.AbsolutePosition.Y + e.AbsoluteSize.Y 
+                            local d6 = d5 - (d3 + d4) 
+                            if d6 < d2 then 
+                                d1 = true 
+                                cY.Position = UDim2.new(0, 0, 0, -d2 - 5) 
+                                cY.Size = UDim2.new(1, 0, 0, 0) 
+                                local aF = TweenInfo.new(bj.tween_time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) 
+                                local aG = am:Create(cY, aF, {Size = UDim2.new(1, 0, 0, d2), Position = UDim2.new(0, 0, 0, -d2 - 5)}) 
+                                aG:Play() 
+                                az(cF, {Rotation = -90}, bj.tween_time) 
+                            else 
+                                d1 = false 
+                                cY.Position = UDim2.new(0, 0, 0, 25) 
+                                cY.Size = UDim2.new(1, 0, 0, 0) 
+                                az(cY, {Size = UDim2.new(1, 0, 0, d2)}, bj.tween_time) 
+                                az(cF, {Rotation = 90}, bj.tween_time) 
+                            end 
+                        else 
+                            bk = false 
+                            if d1 then 
+                                local aF = TweenInfo.new(bj.tween_time, Enum.EasingStyle.Quad, Enum.EasingDirection.Out) 
+                                local aG = am:Create(cY, aF, {Size = UDim2.new(1, 0, 0, 0), Position = UDim2.new(0, 0, 0, -5)}) 
+                                aG:Play() 
+                                aG.Completed:Connect(function() cY.Position = UDim2.new(0, 0, 0, 25) end) 
+                            else 
+                                az(cY, {Size = UDim2.new(1, 0, 0, 0)}, bj.tween_time) 
+                            end 
+                            az(cF, {Rotation = -90}, bj.tween_time) 
+                        end 
+                    end) 
+                    function cW:Add(d7) 
+                        d7 = tostring(d7 or "New Object") 
+                        local aZ = c:FindFirstChild("DropdownButton"):Clone() 
+                        aZ.Parent = cZ 
+                        aZ.Text = " " .. d7 
+                        aZ.ZIndex = aZ.ZIndex + bc * 10 + 5 
+                        aZ.BackgroundTransparency = 1 
+                        aZ.TextColor3 = Color3.new(1, 1, 1) 
+                        aZ.BorderSizePixel = 0 
+                        aZ.TextXAlignment = Enum.TextXAlignment.Left 
+                        local d9 = aZ:FindFirstChildOfClass("UICorner") 
+                        if d9 then d9:Destroy() end 
+                        local bY = Instance.new("UIStroke") 
+                        bY.Color = Color3.new(0, 0, 0) 
+                        bY.Thickness = 1 
+                        bY.Transparency = 0.3 
+                        bY.Parent = aZ 
+                        aZ.MouseEnter:Connect(function() 
+                            aZ.BackgroundTransparency = 0.8 
+                            aZ.BackgroundColor3 = Color3.fromRGB(255, 255, 0) 
+                        end) 
+                        aZ.MouseLeave:Connect(function() aZ.BackgroundTransparency = 1 end) 
+                        aZ.MouseButton1Click:Connect(function() 
+                            if bk then 
+                                cX.Text = " [ " .. d7 .. " ]" 
+                                bk = false 
+                                bF = false 
+                                az(cY, {Size = UDim2.new(1, 0, 0, 0)}, bj.tween_time) 
+                                az(cF, {Rotation = -90}, bj.tween_time) 
+                                pcall(co, d7) 
+                            end 
+                        end) 
+                        return aZ 
+                    end 
+                    return cW, cX 
+                end 
+
+                function bU:AddFolder(dx) 
+                    local dy = {} 
+                    dx = tostring(dx or "New Folder") 
+                    local dz = c:FindFirstChild("Folder"):Clone() 
+                    local b5 = dz:FindFirstChild("Button") 
+                    local cZ = dz:FindFirstChild("Objects") 
+                    local dA = b5:FindFirstChild("Toggle") 
+                    dz.ZIndex = dz.ZIndex + bc * 10 
+                    b5.ZIndex = b5.ZIndex + bc * 10 
+                    cZ.ZIndex = cZ.ZIndex + bc * 10 
+                    dA.ZIndex = dA.ZIndex + bc * 10 
+                    local c1 = c0:FindFirstChild("TabScroller") 
+                    dz.Parent = c1 or c0 
+                    b5.Text = " " .. dx 
+                    local bF = false 
+                    b5.MouseButton1Click:Connect(function() 
+                        bF = not bF 
+                        if bF then 
+                            az(dA, {Rotation = 90}, bj.tween_time) 
+                            cZ.Visible = true 
+                            dz.Size = UDim2.new(1, 0, 0, 100)
+                        else 
+                            az(dA, {Rotation = 0}, bj.tween_time) 
+                            cZ.Visible = false 
+                            dz.Size = UDim2.new(1, 0, 0, 20) 
+                        end 
+                    end) 
+                    for bh, aW in pairs(bU) do 
+                        dy[bh] = function(...) 
+                            local dw = {aW(...)} 
+                            local aZ = dw[#dw] 
+                            if aZ then aZ.Parent = cZ end
+                            return table.unpack(dw) 
+                        end 
+                    end 
+                    return dy, dz 
+                end 
             end 
             return bU, c0 
         end 
@@ -1302,9 +1448,4 @@ function bd:AddWindow(bi, bj)
     return bx, e 
 end 
 
-script.AncestryChanged:Connect(function() 
-    if not script.Parent then av() end 
-end) 
-
--- AQUÍ ESTÁ EL CAMBIO CLAVE: Devolvemos explícitamente la tabla de la librería
 return bd
