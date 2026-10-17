@@ -23,15 +23,16 @@ function Library:AddWindow(title, options)
     options = options or {}
     local windowTitle = title or "System Interface"
     local mainColor = options.main_color or Color3.fromRGB(255, 215, 0) -- Dorado / Amarillo
-    local minSize = options.min_size or Vector2.new(420, 280)
+    local minSize = options.min_size or Vector2.new(450, 320)
 
-    -- Contenedor Ventana Principal
+    -- Contenedor Ventana Principal (Fijo y centrado correctamente)
     local MainFrame = Instance.new("Frame")
     MainFrame.Name = "MainFrame"
     MainFrame.Parent = ScreenGui
     MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
     MainFrame.BorderSizePixel = 0
-    MainFrame.Position = UDim2.new(0.5, -minSize.X / 2, 0.5, -minSize.Y / 2)
+    MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+    MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
     MainFrame.Size = UDim2.new(0, minSize.X, 0, minSize.Y)
     MainFrame.ClipsDescendants = true
     MainFrame.Active = true
@@ -47,12 +48,13 @@ function Library:AddWindow(title, options)
     UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
     UIStroke.Parent = MainFrame
 
-    -- Barra Superior (Title Bar)
+    -- Barra Superior (Title Bar) - Posicionada exactamente arriba
     local TitleBar = Instance.new("Frame")
     TitleBar.Name = "TitleBar"
     TitleBar.Parent = MainFrame
     TitleBar.BackgroundColor3 = Color3.fromRGB(22, 22, 30)
     TitleBar.BorderSizePixel = 0
+    TitleBar.Position = UDim2.new(0, 0, 0, 0)
     TitleBar.Size = UDim2.new(1, 0, 0, 35)
 
     local TitleBarCorner = Instance.new("UICorner")
@@ -83,27 +85,34 @@ function Library:AddWindow(title, options)
     ToggleBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
     ToggleBtn.TextSize = 18
 
-    -- Contenedor de Pestañas (Tabs)
-    local TabBar = Instance.new("Frame")
+    -- Contenedor de Pestañas (Tabs) - Justo debajo de la barra superior
+    local TabBar = Instance.new("ScrollingFrame")
     TabBar.Name = "TabBar"
     TabBar.Parent = MainFrame
-    TabBar.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-    TabBar.BorderSizePixel = 0
-    TabBar.Position = UDim2.new(0, 0, 0, 35)
-    TabBar.Size = UDim2.new(1, 0, 0, 30)
+    TabBar.BackgroundTransparency = 1
+    TabBar.Position = UDim2.new(0, 10, 0, 42)
+    TabBar.Size = UDim2.new(1, -20, 0, 30)
+    TabBar.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabBar.ScrollBarThickness = 0
+    TabBar.ScrollingDirection = Enum.ScrollingDirection.X
 
     local TabList = Instance.new("UIListLayout")
     TabList.Parent = TabBar
     TabList.FillDirection = Enum.FillDirection.Horizontal
     TabList.SortOrder = Enum.SortOrder.LayoutOrder
-    TabList.Padding = UDim.new(0, 5)
+    TabList.Padding = UDim.new(0, 6)
 
+    TabList:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        TabBar.CanvasSize = UDim2.new(0, TabList.AbsoluteContentSize.X + 10, 0, 0)
+    end)
+
+    -- Contenedor de las páginas de contenido
     local TabContainer = Instance.new("Frame")
     TabContainer.Name = "TabContainer"
     TabContainer.Parent = MainFrame
     TabContainer.BackgroundTransparency = 1
-    TabContainer.Position = UDim2.new(0, 10, 0, 70)
-    TabContainer.Size = UDim2.new(1, -20, 1, -75)
+    TabContainer.Position = UDim2.new(0, 10, 0, 80)
+    TabContainer.Size = UDim2.new(1, -20, 1, -85)
 
     -- Sistema de Arrastre táctil y ratón (Draggable)
     local dragging, dragInput, dragStart, startPos
@@ -140,9 +149,13 @@ function Library:AddWindow(title, options)
         if collapsed then
             MainFrame:TweenSize(UDim2.new(0, minSize.X, 0, 35), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
             ToggleBtn.Text = "+"
+            TabBar.Visible = false
+            TabContainer.Visible = false
         else
             MainFrame:TweenSize(UDim2.new(0, minSize.X, 0, minSize.Y), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
             ToggleBtn.Text = "-"
+            TabBar.Visible = true
+            TabContainer.Visible = true
         end
     end)
 
@@ -155,14 +168,14 @@ function Library:AddWindow(title, options)
         TabBtn.Parent = TabBar
         TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
         TabBtn.BorderSizePixel = 0
-        TabBtn.Size = UDim2.new(0, 100, 1, 0)
+        TabBtn.Size = UDim2.new(0, 110, 1, 0)
         TabBtn.Font = Enum.Font.GothamMedium
         TabBtn.Text = tabName
         TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
         TabBtn.TextSize = 12
 
         local TabCorner = Instance.new("UICorner")
-        TabCorner.CornerRadius = UDim.new(0, 4)
+        TabCorner.CornerRadius = UDim.new(0, 5)
         TabCorner.Parent = TabBtn
 
         local PageScroller = Instance.new("ScrollingFrame")
@@ -200,7 +213,7 @@ function Library:AddWindow(title, options)
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
         end)
 
-        if #TabBar:GetChildren() == 2 then
+        if #TabBar:GetChildren() == 2 then -- UIListLayout cuenta como hijo, la 1era pestaña real es el segundo elemento
             PageScroller.Visible = true
             TabBtn.TextColor3 = mainColor
             TabBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
@@ -216,7 +229,7 @@ function Library:AddWindow(title, options)
             Btn.Parent = PageScroller
             Btn.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
             Btn.BorderSizePixel = 0
-            Btn.Size = UDim2.new(1, -5, 0, 30)
+            Btn.Size = UDim2.new(1, -5, 0, 32)
             Btn.Font = Enum.Font.GothamBold
             Btn.Text = btnText
             Btn.TextColor3 = Color3.fromRGB(240, 240, 240)
@@ -249,7 +262,7 @@ function Library:AddWindow(title, options)
             local ToggleFrame = Instance.new("Frame")
             ToggleFrame.Parent = PageScroller
             ToggleFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 38)
-            ToggleFrame.Size = UDim2.new(1, -5, 0, 30)
+            ToggleFrame.Size = UDim2.new(1, -5, 0, 32)
 
             local FrameCorner = Instance.new("UICorner")
             FrameCorner.CornerRadius = UDim.new(0, 5)
@@ -269,7 +282,7 @@ function Library:AddWindow(title, options)
             local BoxBtn = Instance.new("TextButton")
             BoxBtn.Parent = ToggleFrame
             BoxBtn.BackgroundColor3 = Color3.fromRGB(18, 18, 24)
-            BoxBtn.Position = UDim2.new(1, -30, 0.5, -10)
+            BoxBtn.Position = UDim2.new(1, -32, 0.5, -10)
             BoxBtn.Size = UDim2.new(0, 20, 0, 20)
             BoxBtn.Font = Enum.Font.GothamBold
             BoxBtn.Text = ""
